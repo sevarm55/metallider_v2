@@ -1,0 +1,323 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Каталог ─────────────────────────────────────────
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  image     String?
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  logo     String?
+  products Product[]
+
+  @@map("brands")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  code        String? @unique // артикул
+  barcode     String?
+  description String? @db.Text
+
+  price         Float @default(0) // Цена продажи
+  specialPrice  Float @default(0) // Спец цена
+  specialPrice1 Float @default(0) // Спец 1
+  buyPrice      Float @default(0) // Закупочная
+
+  unit  Unit  @default(PCS) // единица измерения
+  stock Float @default(0) // остаток на складе
+
+  isActive Boolean @default(true)
+  isHit    Boolean @default(false) // хит продаж
+  isNew    Boolean @default(false) // новинка
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+  brandId    String?
+  brand      Brand?    @relation(fields: [brandId], references: [id])
+
+  items      ProductItem[]
+  images     ProductImage[]
+  attributes ProductAttribute[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  moyskladId String? @unique // ID из МойСклад для синхронизации
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isActive])
+  @@index([price])
+  @@map("products")
+}
+
+enum Unit {
+  PCS   // штуки
+  METER // метры
+  M2    // квадратные метры
+  KG    // килограммы
+  PACK  // упаковка
+  SET   // комплект
+}
+
+// Варианты товара (например, разная длина одного и того же профиля)
+model ProductItem {
+  id    String @id @default(cuid())
+  name  String? // название варианта ("6м", "12м")
+  price Float
+  stock Float  @default(0)
+
+  moyskladCode String?
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems    CartItem[]
+
+  @@index([productId])
+  @@map("product_items")
+}
+
+// ─── EAV: Характеристики товаров ─────────────────────
+
+enum AttributeType {
+  NUMBER // числовое значение (диаметр, толщина)
+  STRING // строковое (марка стали, тип покрытия)
+  COLOR  // цвет RAL
+}
+
+// Справочник атрибутов (Диаметр, Толщина стенки, Цвет RAL...)
+model Attribute {
+  id        String        @id @default(cuid())
+  name      String        // "Диаметр", "Толщина стенки"
+  key       String        @unique // "diameter", "wall_thickness"
+  type      AttributeType @default(STRING)
+  unit      String?       // "мм", "м", "кг"
+  sortOrder Int           @default(0)
+  isFilter  Boolean       @default(true) // показывать в фильтрах
+  values    ProductAttribute[]
+
+  @@map("attributes")
+}
+
+// Значения атрибутов для конкретного товара
+model ProductAttribute {
+  id           String  @id @default(cuid())
+  value        String  // "10", "RAL 8017", "Северсталь"
+  numericValue Float?  // 10.0 — для числовых фильтров и сортировки
+
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, attributeId]) // один атрибут — одно значение на товар
+  @@index([attributeId])
+  @@index([productId])
+  @@map("product_attributes")
+}
+
+model ProductImage {
+  id       String  @id @default(cuid())
+  url      String
+  position Int     @default(0)
+  isMain   Boolean @default(false)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// ─── Пользователи ────────────────────────────────────
+
+model User {
+  id         String    @id @default(cuid())
+  fullName   String
+  email      String    @unique
+  phone      String?   @unique
+  password   String
+  role       UserRole  @default(USER)
+  verified   DateTime?
+  provider   String? // google, yandex и т.д.
+  providerId String?
+  isActive   Boolean   @default(true)
+
+  cart             Cart?
+  orders           Order[]
+  verificationCode VerificationCode?
+  adminLogs        AdminLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@map("verification_codes")
+}
+
+// ─── Корзина ─────────────────────────────────────────
+
+model Cart {
+  id          String     @id @default(cuid())
+  userId      String?    @unique
+  token       String     @unique // для гостевой корзины
+  totalAmount Float      @default(0)
+  user        User?      @relation(fields: [userId], references: [id])
+  items       CartItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id            String       @id @default(cuid())
+  quantity      Float        @default(1)
+  cartId        String
+  cart          Cart         @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product      @relation(fields: [productId], references: [id])
+  productItemId String?
+  productItem   ProductItem? @relation(fields: [productItemId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+// ─── Заказы ──────────────────────────────────────────
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement())
+  status      OrderStatus @default(NEW)
+  token       String // токен сессии
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  fullName    String
+  phone       String
+  email       String?
+  address     String?
+  comment     String? @db.Text
+  notes       String? // внутренние заметки менеджера
+  paymentId   String?
+  totalAmount Float   @default(0)
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id    String @id @default(cuid())
+  qty   Float  @default(1)
+  price Float // цена на момент заказа
+  total Float // qty * price
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ─── Админ-логи ──────────────────────────────────────
+
+model AdminLog {
+  id     String @id @default(cuid())
+  action String // CREATE, UPDATE, DELETE
+  entity String // Product, Order, Category...
+  entityId String?
+  data   Json?  // что изменилось
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@map("admin_logs")
+}
+
+// ─── Заявки на обратный звонок / быстрый заказ ───────
+
+model CallbackRequest {
+  id          String  @id @default(cuid())
+  type        String  @default("callback")
+  name        String?
+  phone       String
+  productId   String? @map("product_id")
+  productName String? @map("product_name")
+  status      String  @default("new")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("callback_requests")
+}
