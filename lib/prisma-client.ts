@@ -9,7 +9,26 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({ adapter });
+  const client = new PrismaClient({ adapter });
+
+  // Auto-hide products when stock reaches 0, auto-show when stock > 0
+  const extended = client.$extends({
+    query: {
+      product: {
+        async update({ args, query }) {
+          const data = args.data;
+          if (data && typeof data.stock === "number") {
+            if (data.stock <= 0) {
+              data.isActive = false;
+            }
+          }
+          return query(args);
+        },
+      },
+    },
+  });
+
+  return extended;
 };
 
 declare global {

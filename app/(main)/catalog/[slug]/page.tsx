@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { CategoryProducts } from "@/components/shared/category-products";
 import {
@@ -10,7 +11,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/shared/json-ld";
 import { prisma } from "@/lib/prisma-client";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://metallider.ru";
 
 const unitLabels: Record<string, string> = {
   PCS: "шт",
@@ -29,12 +33,29 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const category = await prisma.category.findUnique({
     where: { slug },
-    select: { name: true },
+    select: {
+      name: true,
+      parent: { select: { name: true } },
+      _count: { select: { products: { where: { isActive: true } } } },
+    },
   });
   if (!category) return { title: "Категория не найдена" };
+
+  const parentName = category.parent?.name;
+  const title = `${category.name} — купить в Москве | МеталлЛидер`;
+  const description = `${category.name}${parentName ? ` (${parentName})` : ""} — ${category._count.products} товаров в наличии. Низкие цены, доставка по Москве и МО. Купить ${category.name.toLowerCase()} в МеталлЛидер.`;
+
   return {
-    title: `${category.name} — МеталлЛидер`,
-    description: `${category.name} — купить по выгодной цене в МеталлЛидер.`,
+    title,
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/catalog/${slug}`,
+    },
+    openGraph: {
+      title: `${category.name} — МеталлЛидер`,
+      description,
+      url: `${SITE_URL}/catalog/${slug}`,
+    },
   };
 }
 
@@ -64,11 +85,24 @@ export default async function CategoryPage({ params }: PageProps) {
   // Build category IDs to query products from
   let categoryIds: string[];
   if (isParent) {
-    // Parent category: get products from ALL children
-    categoryIds = category.children.map((c) => c.id);
+    // Parent category: get products from ALL children + own products
+    categoryIds = [category.id, ...category.children.map((c) => c.id)];
   } else {
     // Subcategory or leaf: get products only from this category
     categoryIds = [category.id];
+  }
+
+  // Natural sort: extract numbers from name for sorting by dimensions
+  // e.g. "Труба профильная 15х15х1.5" → [15, 15, 1.5]
+  function extractNumbers(name: string): number[] {
+    // Find the dimensions pattern like "15х15х1.5" or "100x50x3"
+    const match = name.match(/[\d]+[.,]?\d*[хxХX×][\d]+[.,]?\d*(?:[хxХX×][\d]+[.,]?\d*)*/);
+    if (match) {
+      return match[0].split(/[хxХX×]/).map((n) => parseFloat(n.replace(",", ".")));
+    }
+    // Fallback: find any standalone number (e.g. "Арматура ф 10")
+    const nums = name.match(/\d+[.,]?\d*/g);
+    return nums ? nums.map((n) => parseFloat(n.replace(",", "."))) : [];
   }
 
   const dbProducts = await prisma.product.findMany({
@@ -80,7 +114,18 @@ export default async function CategoryPage({ params }: PageProps) {
         orderBy: { attribute: { sortOrder: "asc" } },
       },
     },
-    orderBy: { createdAt: "desc" },
+  });
+
+  // Sort naturally by dimensions (small → large)
+  dbProducts.sort((a, b) => {
+    const numsA = extractNumbers(a.name);
+    const numsB = extractNumbers(b.name);
+    for (let i = 0; i < Math.max(numsA.length, numsB.length); i++) {
+      const na = numsA[i] ?? 0;
+      const nb = numsB[i] ?? 0;
+      if (na !== nb) return na - nb;
+    }
+    return a.name.localeCompare(b.name, "ru");
   });
 
   const products = dbProducts.map((p) => ({
@@ -144,8 +189,21 @@ export default async function CategoryPage({ params }: PageProps) {
     }));
   }
 
+  const breadcrumbItems = [
+    { name: "Главная", href: "/" },
+    { name: "Каталог", href: "/catalog" },
+    ...(category.parent ? [{ name: category.parent.name, href: `/catalog/${category.parent.slug}` }] : []),
+    { name: category.name, href: `/catalog/${category.slug}` },
+  ];
+
   return (
-    <Container className="py-6 lg:py-8">
+    <>
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <ItemListJsonLd
+        items={products.map((p) => ({ name: p.name, slug: p.slug, price: p.price, image: p.images[0] }))}
+        categoryName={category.name}
+      />
+      <Container className="py-6 lg:py-8">
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -179,10 +237,25 @@ export default async function CategoryPage({ params }: PageProps) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="mb-1 text-3xl font-bold">{category.name}</h1>
-      <p className="mb-6 text-muted-foreground">
-        {products.length} {products.length === 1 ? "товар" : "товаров"}
-      </p>
+      <div className="relative mb-10 overflow-hidden">
+        <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
+          {category.name.split(" ")[0]}
+        </span>
+        <div className="relative">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="block h-7 w-1 rounded-full bg-orange-500" />
+            <span className="text-sm font-bold uppercase tracking-widest text-orange-500">
+              {category.parent ? category.parent.name : "Каталог"}
+            </span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+            {category.name}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {products.length} {products.length === 1 ? "товар" : "товаров"}
+          </p>
+        </div>
+      </div>
 
       {isParent ? (
         <CategoryProducts
@@ -191,20 +264,42 @@ export default async function CategoryPage({ params }: PageProps) {
         />
       ) : siblings.length > 1 ? (
         <div>
-          {/* Show sibling tabs for navigation */}
-          <div className="mb-6 flex flex-wrap gap-2">
+          {/* Sibling category cards with "All" link */}
+          <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:gap-4">
+            {/* All products card → parent category */}
+            <Link
+              href={`/catalog/${category.parent!.slug}`}
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+            >
+              <span className="text-2xl font-black font-(family-name:--font-unbounded) text-neutral-900">
+                {siblings.reduce((sum, s) => sum + s.count, 0)}
+              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold">Все товары</span>
+                <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 text-neutral-400" />
+              </div>
+            </Link>
             {siblings.map((s) => (
               <Link
                 key={s.id}
                 href={`/catalog/${s.slug}`}
-                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 ${
                   s.id === category.id
-                    ? "border-primary bg-primary text-white"
-                    : "border-neutral-200 bg-white text-neutral-700 hover:border-primary hover:text-primary"
+                    ? "bg-zinc-800  text-white shadow-lg"
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                 }`}
               >
-                {s.name}
-                <span className="ml-1.5 text-xs opacity-60">{s.count}</span>
+                <span className={`text-2xl font-black font-(family-name:--font-unbounded) ${
+                  s.id === category.id ? "text-white" : "text-neutral-900"
+                }`}>
+                  {s.count}
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold">{s.name}</span>
+                  <ArrowRight className={`h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                    s.id === category.id ? "text-primary" : "text-neutral-400"
+                  }`} />
+                </div>
               </Link>
             ))}
           </div>
@@ -232,5 +327,6 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
       )}
     </Container>
+    </>
   );
 }

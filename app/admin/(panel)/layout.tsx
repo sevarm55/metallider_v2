@@ -9,7 +9,7 @@ function PanelContent({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#f5f5f5]">
       <AdminSidebar />
       <div
         className={cn(

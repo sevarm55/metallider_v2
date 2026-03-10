@@ -1,7 +1,7 @@
 export const heroSlides = [
   {
     id: 1,
-    image: "/images/hero-1.webp",
+    image: "/images/slide3.png",
     title: "Металлопрокат оптом и в розницу",
     subtitle: "Более 336 наименований: трубы, листы, арматура, уголки, швеллеры",
     buttonText: "Перейти в каталог",
@@ -9,7 +9,7 @@ export const heroSlides = [
   },
   {
     id: 2,
-    image: "/images/hero-2.webp",
+    image: "/images/slid2.png",
     title: "Доставка по Москве и МО",
     subtitle: "Быстрая доставка со склада. Самовывоз с базы.",
     buttonText: "Условия доставки",
@@ -17,7 +17,15 @@ export const heroSlides = [
   },
   {
     id: 3,
-    image: "/images/hero-3.webp",
+    image: "/images/categories/fasonniy.webp",
+    title: "Всё для строительства из металла",
+    subtitle: "Профнастил, трубы профильные, листы, метизы — всё в наличии",
+    buttonText: "Связаться с нами",
+    buttonHref: "/contacts",
+  },
+  {
+    id: 4,
+    image: "/images/categories/listy.webp",
     title: "Всё для строительства из металла",
     subtitle: "Профнастил, трубы профильные, листы, метизы — всё в наличии",
     buttonText: "Связаться с нами",

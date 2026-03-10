@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
             <ShieldCheck className="h-7 w-7 text-primary" />
           </div>
           <h1 className="font-(family-name:--font-archivo-black) text-2xl tracking-widest text-white">
-            ТРУБМАРКЕТ
+            МЕТАЛЛЛИДЕР
           </h1>
           <p className="mt-2 text-sm text-white/50">Панель управления</p>
         </div>
@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@trubmarket.ru"
+                placeholder="admin@metallider.ru"
                 className="h-12 border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/30"
                 {...register("email")}
               />

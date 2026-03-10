@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { removeBackground, generateProductImage, downloadAndSave } from "@/lib/fal";
+import { removeBackground, generateProductImage, generateCategoryImage, downloadAndSave } from "@/lib/fal";
 import { getAdminUserId } from "@/lib/get-admin-user-id";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
 
@@ -23,13 +23,22 @@ export async function POST(request: NextRequest) {
       return apiSuccess({ url: resultUrl });
     }
 
+    if (action === "generate-category") {
+      if (!categoryName || typeof categoryName !== "string") {
+        return apiError("Укажите название категории", 400, "VALIDATION_ERROR");
+      }
+      const falUrl = await generateCategoryImage(categoryName);
+      const resultUrl = await downloadAndSave(falUrl, "category");
+      return apiSuccess({ url: resultUrl });
+    }
+
     if (!imageUrl || typeof imageUrl !== "string") {
       return apiError("Укажите URL изображения", 400, "VALIDATION_ERROR");
     }
 
     if (action !== "remove-bg") {
       return apiError(
-        "Укажите действие: remove-bg или generate",
+        "Укажите действие: remove-bg, generate или generate-category",
         400,
         "VALIDATION_ERROR",
       );
