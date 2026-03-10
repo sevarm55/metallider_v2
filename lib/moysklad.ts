@@ -162,6 +162,122 @@ function extractBuyPrice(product: MoyskladProduct): number | null {
   return null;
 }
 
+export interface StockSyncDetail {
+  code: string;
+  name: string;
+  oldStock: number;
+  newStock: number;
+  status: "updated" | "not_found" | "error" | "unchanged";
+  error?: string;
+}
+
+export interface StockSyncResult {
+  total: number;
+  updated: number;
+  notFound: number;
+  unchanged: number;
+  errors: number;
+  details: StockSyncDetail[];
+}
+
+/**
+ * Синхронизирует остатки всех товаров с непустым code из МойСклад.
+ */
+export async function syncAllStock(): Promise<StockSyncResult> {
+  const products = await prisma.product.findMany({
+    where: { code: { not: null } },
+    select: { id: true, code: true, name: true, stock: true },
+  });
+
+  const withCode = products.filter((p) => p.code && p.code.trim() !== "");
+
+  const result: StockSyncResult = {
+    total: withCode.length,
+    updated: 0,
+    notFound: 0,
+    unchanged: 0,
+    errors: 0,
+    details: [],
+  };
+
+  for (const product of withCode) {
+    const code = product.code!.trim();
+
+    try {
+      // Fetch stock from MoySklad stock endpoint
+      const url = `${MOYSKLAD_API}/report/stock/bystore?filter=code=${encodeURIComponent(code)}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        // Fallback: try assortment endpoint for stock field
+        const msProduct = await fetchMoyskladByArticle(code);
+        if (!msProduct) {
+          result.notFound++;
+          result.details.push({ code, name: product.name, oldStock: product.stock, newStock: product.stock, status: "not_found" });
+          await new Promise((r) => setTimeout(r, 25));
+          continue;
+        }
+
+        const newStock = msProduct.stock ?? 0;
+        if (newStock === product.stock) {
+          result.unchanged++;
+          result.details.push({ code, name: product.name, oldStock: product.stock, newStock, status: "unchanged" });
+        } else {
+          await prisma.product.update({ where: { id: product.id }, data: { stock: newStock } });
+          result.updated++;
+          result.details.push({ code, name: product.name, oldStock: product.stock, newStock, status: "updated" });
+        }
+        await new Promise((r) => setTimeout(r, 25));
+        continue;
+      }
+
+      const data = await res.json();
+      const rows = data.rows || [];
+
+      if (rows.length === 0) {
+        result.notFound++;
+        result.details.push({ code, name: product.name, oldStock: product.stock, newStock: product.stock, status: "not_found" });
+        await new Promise((r) => setTimeout(r, 25));
+        continue;
+      }
+
+      // Sum stock across all stores
+      let totalStock = 0;
+      for (const row of rows) {
+        if (row.stockByStore) {
+          for (const store of row.stockByStore) {
+            totalStock += store.stock || 0;
+          }
+        }
+      }
+
+      if (totalStock === product.stock) {
+        result.unchanged++;
+        result.details.push({ code, name: product.name, oldStock: product.stock, newStock: totalStock, status: "unchanged" });
+      } else {
+        await prisma.product.update({ where: { id: product.id }, data: { stock: totalStock } });
+        result.updated++;
+        result.details.push({ code, name: product.name, oldStock: product.stock, newStock: totalStock, status: "updated" });
+      }
+    } catch (err) {
+      result.errors++;
+      result.details.push({
+        code, name: product.name, oldStock: product.stock, newStock: product.stock,
+        status: "error", error: err instanceof Error ? err.message : "Неизвестная ошибка",
+      });
+    }
+
+    await new Promise((r) => setTimeout(r, 25));
+  }
+
+  return result;
+}
+
 /**
  * Синхронизирует цены всех товаров с непустым code из МойСклад.
  */

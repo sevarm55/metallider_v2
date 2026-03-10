@@ -5,6 +5,7 @@ import { serverRegisterSchema } from "@/lib/auth-schemas";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { checkRequestSize } from "@/lib/request-size-limit";
+import { sendEmail, buildVerificationEmail } from "@/lib/send-email";
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = checkRateLimit(request, "register");
@@ -80,8 +81,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send email with verification code
-    console.log(`[DEV] Verification code for ${email}: ${code}`);
+    // Send verification email
+    try {
+      const { subject, html } = buildVerificationEmail(code);
+      await sendEmail({ to: email, subject, html });
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Don't block registration if email fails — user can request resend
+    }
 
     return apiSuccess({ userId: user.id }, "Регистрация прошла успешно. Проверьте email.", 201);
   } catch (error) {

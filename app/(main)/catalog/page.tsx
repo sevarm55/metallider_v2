@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, Package } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import {
   Breadcrumb,
@@ -12,20 +13,20 @@ import {
 } from "@/components/ui/breadcrumb";
 import { prisma } from "@/lib/prisma-client";
 
-export const metadata: Metadata = {
-  title: "Каталог товаров — МеталлЛидер",
-  description: "Полный каталог металлопроката: трубы, листы, арматура, уголки, швеллеры и метизы.",
-};
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://metallider.ru";
 
-// Accent colors for parent categories
-const categoryColors = [
-  { bg: "bg-orange-50", border: "border-orange-200/60", accent: "text-orange-600", iconBg: "bg-orange-100", hoverBorder: "hover:border-orange-300" },
-  { bg: "bg-blue-50", border: "border-blue-200/60", accent: "text-blue-600", iconBg: "bg-blue-100", hoverBorder: "hover:border-blue-300" },
-  { bg: "bg-emerald-50", border: "border-emerald-200/60", accent: "text-emerald-600", iconBg: "bg-emerald-100", hoverBorder: "hover:border-emerald-300" },
-  { bg: "bg-violet-50", border: "border-violet-200/60", accent: "text-violet-600", iconBg: "bg-violet-100", hoverBorder: "hover:border-violet-300" },
-  { bg: "bg-rose-50", border: "border-rose-200/60", accent: "text-rose-600", iconBg: "bg-rose-100", hoverBorder: "hover:border-rose-300" },
-  { bg: "bg-amber-50", border: "border-amber-200/60", accent: "text-amber-600", iconBg: "bg-amber-100", hoverBorder: "hover:border-amber-300" },
-];
+export const metadata: Metadata = {
+  title: "Каталог металлопроката — купить трубы, арматуру, листы в Москве | МеталлЛидер",
+  description: "Полный каталог металлопроката: трубы профильные и круглые, листы стальные, арматура, уголки, швеллеры, профнастил, метизы. Более 300 наименований в наличии. Цены от производителя.",
+  alternates: {
+    canonical: `${SITE_URL}/catalog`,
+  },
+  openGraph: {
+    title: "Каталог металлопроката — МеталлЛидер",
+    description: "Более 300 наименований металлопроката в наличии. Трубы, арматура, листы, уголки, швеллеры.",
+    url: `${SITE_URL}/catalog`,
+  },
+};
 
 export default async function CatalogPage() {
   const parentCategories = await prisma.category.findMany({
@@ -35,6 +36,8 @@ export default async function CatalogPage() {
       id: true,
       name: true,
       slug: true,
+      image: true,
+      _count: { select: { products: { where: { isActive: true } } } },
       children: {
         where: { isActive: true },
         orderBy: { sortOrder: "asc" },
@@ -49,7 +52,7 @@ export default async function CatalogPage() {
   });
 
   const totalProducts = parentCategories.reduce(
-    (sum, p) => sum + p.children.reduce((s, c) => s + c._count.products, 0),
+    (sum, p) => sum + p._count.products + p.children.reduce((s, c) => s + c._count.products, 0),
     0,
   );
 
@@ -69,78 +72,112 @@ export default async function CatalogPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Каталог товаров</h1>
-        <p className="mt-2 text-muted-foreground">
-          {parentCategories.length} разделов &middot; {totalProducts} товаров в наличии
-        </p>
+      {/* Section heading */}
+      <div className="relative mb-10 overflow-hidden">
+        <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
+          КАТАЛОГ
+        </span>
+        <div className="relative">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="block h-7 w-1 rounded-full bg-orange-500" />
+            <span className="text-sm font-bold uppercase tracking-widest text-orange-500">
+              Металлопрокат
+            </span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+            Каталог товаров
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {parentCategories.length} разделов &middot; {totalProducts} товаров в наличии
+          </p>
+        </div>
       </div>
 
-      {/* Categories grid */}
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {/* Categories */}
+      <div className="space-y-6">
         {parentCategories.map((parent, idx) => {
-          const color = categoryColors[idx % categoryColors.length];
-          const totalInParent = parent.children.reduce((s, c) => s + c._count.products, 0);
+          const totalInParent = parent._count.products + parent.children.reduce((s, c) => s + c._count.products, 0);
 
           return (
             <div
               key={parent.id}
-              className={`group relative overflow-hidden rounded-2xl border ${color.border} ${color.bg} p-5 transition-all duration-300 ${color.hoverBorder} hover:shadow-lg`}
+              className="group relative overflow-hidden rounded-2xl bg-zinc-800 transition-all duration-300 hover:shadow-2xl"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
+              {/* Background number */}
+              <span className="pointer-events-none absolute right-6 top-4 z-10 select-none text-[7rem] font-black leading-none text-white/5 font-(family-name:--font-unbounded)">
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+
+              <div className="relative z-10 flex flex-col lg:flex-row">
+                {/* Image side */}
                 <Link
                   href={`/catalog/${parent.slug}`}
-                  className="flex items-center gap-3"
+                  className="relative block h-56 lg:h-auto lg:w-92 shrink-0 overflow-hidden"
                 >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color.iconBg}`}>
-                    <Layers className={`h-5 w-5 ${color.accent}`} />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-neutral-900 group-hover:text-primary transition-colors">
-                      {parent.name}
-                    </h2>
-                    <p className="text-xs text-neutral-500">{totalInParent} товаров</p>
-                  </div>
+                  {parent.image ? (
+                    <Image
+                      src={parent.image}
+                      alt={parent.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
+                      <Package className="h-14 w-14 text-neutral-700" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-linear-to-r from-zinc-800/100 to-transparent lg:bg-linear-to-l" />
                 </Link>
-                <Link
-                  href={`/catalog/${parent.slug}`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${color.iconBg} ${color.accent} opacity-0 group-hover:opacity-100 transition-all`}
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
 
-              {/* Subcategories */}
-              <div className="space-y-0.5">
-                {parent.children.map((sub) => (
-                  <Link
-                    key={sub.id}
-                    href={`/catalog/${sub.slug}`}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-white/80 hover:text-primary transition-all"
-                  >
-                    <span className="flex items-center gap-2">
-                      <ChevronRight className="h-3.5 w-3.5 text-neutral-400" />
-                      {sub.name}
-                    </span>
-                    {sub._count.products > 0 && (
-                      <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold text-neutral-500">
-                        {sub._count.products}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </div>
+                {/* Content */}
+                <div className="flex-1 p-6 lg:p-8">
+                  {/* Category header */}
+                  <div className="flex items-center justify-between mb-5">
+                    <Link href={`/catalog/${parent.slug}`} className="group/title">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                          Раздел {String(idx + 1).padStart(2, "0")}
+                        </span>
+                        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-white/50">
+                          {totalInParent} товаров
+                        </span>
+                      </div>
+                      <h2 className="text-2xl font-extrabold text-white font-(family-name:--font-unbounded) group-hover/title:text-primary transition-colors">
+                        {parent.name}
+                      </h2>
+                    </Link>
+                    <Link
+                      href={`/catalog/${parent.slug}`}
+                      className="hidden sm:flex items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2 text-xs font-semibold text-white/60 hover:bg-primary hover:text-white transition-all"
+                    >
+                      Все товары <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
 
-              {/* View all link */}
-              <Link
-                href={`/catalog/${parent.slug}`}
-                className={`mt-3 flex items-center gap-1 text-xs font-semibold ${color.accent} hover:underline`}
-              >
-                Смотреть все
-                <ArrowRight className="h-3 w-3" />
-              </Link>
+                  {/* Subcategories grid */}
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                    {parent.children.map((sub) => (
+                      <Link
+                        key={sub.id}
+                        href={`/catalog/${sub.slug}`}
+                        className="group/sub flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition-all"
+                      >
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-white/80 group-hover/sub:text-white transition-colors line-clamp-1">
+                            {sub.name}
+                          </span>
+                          {sub._count.products > 0 && (
+                            <span className="text-[10px] text-white/30">
+                              {sub._count.products} шт
+                            </span>
+                          )}
+                        </div>
+                        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/20 group-hover/sub:text-primary group-hover/sub:translate-x-0.5 transition-all" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}

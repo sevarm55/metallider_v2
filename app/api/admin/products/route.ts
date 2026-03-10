@@ -14,10 +14,15 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const search = searchParams.get("search") || "";
+    const categoryId = searchParams.get("categoryId") || "";
 
-    const where = search
-      ? { name: { contains: search, mode: "insensitive" as const } }
-      : {};
+    const where: Record<string, unknown> = {};
+    if (search) {
+      where.name = { contains: search, mode: "insensitive" as const };
+    }
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
         specialPrice: data.specialPrice || 0,
         unit: data.unit,
         stock: data.stock,
-        isActive: data.isActive,
+        isActive: data.stock <= 0 ? false : data.isActive,
         isHit: data.isHit,
         isNew: data.isNew,
         images: data.images.length > 0
@@ -141,10 +146,19 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete related records first, then products
+    await prisma.cartItem.deleteMany({
+      where: { productId: { in: ids } },
+    });
+    await prisma.orderItem.deleteMany({
+      where: { productId: { in: ids } },
+    });
     await prisma.productAttribute.deleteMany({
       where: { productId: { in: ids } },
     });
     await prisma.productImage.deleteMany({
+      where: { productId: { in: ids } },
+    });
+    await prisma.productItem.deleteMany({
       where: { productId: { in: ids } },
     });
 

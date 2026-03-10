@@ -37,13 +37,28 @@ export default function FavoritesPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold lg:text-3xl">Избранное</h1>
-        {hydrated && items.length > 0 && (
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={clear}>
-            Очистить всё
-          </Button>
-        )}
+      <div className="relative mb-10 overflow-x-clip">
+        <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
+          ИЗБРАННОЕ
+        </span>
+        <div className="relative">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="block h-7 w-1 rounded-full bg-orange-500" />
+            <span className="text-sm font-bold uppercase tracking-widest text-orange-500">
+              Мои товары
+            </span>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+              Избранное
+            </h1>
+            {hydrated && items.length > 0 && (
+              <Button variant="ghost" size="sm" className="w-fit text-muted-foreground" onClick={clear}>
+                Очистить всё
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       {!hydrated ? (

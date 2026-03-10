@@ -9,7 +9,6 @@ import {
   Heart,
   User,
   Menu,
-  ChevronDown,
   Phone,
   LayoutGrid,
 } from "lucide-react";
@@ -19,6 +18,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Container } from "./container";
 import { TopBar } from "./top-bar";
 import { SearchBar } from "./search-bar";
+import { CatalogMenu } from "./catalog-menu";
 import { CallbackModal } from "./callback-modal";
 import { contactInfo } from "@/lib/mock-data";
 import { useCartStore } from "@/lib/store/cart";
@@ -235,15 +235,8 @@ export function Header() {
       <nav className="sticky top-0 z-50 hidden lg:block border-b border-neutral-100 bg-white/80 backdrop-blur-lg shadow-sm">
         <Container>
           <div className="flex items-center">
-            {/* Catalog button */}
-            <Link
-              href="/catalog"
-              className="flex items-center gap-2 rounded-lg bg-primary mr-1 px-5 py-2 my-1.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Каталог
-              <ChevronDown className="h-3.5 w-3.5 ml-0.5 opacity-70" />
-            </Link>
+            {/* Catalog mega-menu */}
+            <CatalogMenu />
 
             {/* Divider */}
             <div className="mx-2 h-5 w-px bg-neutral-200" />

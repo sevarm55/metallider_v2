@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Truck, Shield, RotateCcw } from "lucide-react";
+import { Truck, Shield, RotateCcw, Phone, ChevronRight, MapPin, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { ProductCard } from "@/components/shared/product-card";
 import { AddToCartSection } from "@/components/shared/add-to-cart-section";
 import { ProductGallery } from "@/components/shared/product-gallery";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,9 +14,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/shared/json-ld";
 import { prisma } from "@/lib/prisma-client";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://metallider.ru";
 
 const unitLabels: Record<string, string> = {
   PCS: "шт",
@@ -37,12 +38,39 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
-    select: { name: true, code: true, price: true },
+    select: {
+      name: true,
+      code: true,
+      price: true,
+      specialPrice: true,
+      unit: true,
+      images: { take: 1, orderBy: { position: "asc" }, select: { url: true } },
+      category: { select: { name: true } },
+    },
   });
   if (!product) return { title: "Товар не найден" };
+
+  const effectivePrice = product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price
+    ? product.specialPrice
+    : product.price;
+  const unit = unitLabels[product.unit] || "шт";
+  const imageUrl = product.images[0]?.url;
+
   return {
-    title: `${product.name} — купить в МеталлЛидер`,
-    description: `${product.name}${product.code ? `, артикул ${product.code}` : ""}. Цена ${product.price} руб. Купить в МеталлЛидер с доставкой.`,
+    title: `${product.name} — купить в Москве | МеталлЛидер`,
+    description: `${product.name}${product.code ? ` (арт. ${product.code})` : ""}. Цена от ${effectivePrice.toLocaleString("ru-RU")} ₽/${unit}. ${product.category?.name || "Металлопрокат"} с доставкой по Москве и МО. В наличии на складе.`,
+    alternates: {
+      canonical: `${SITE_URL}/product/${slug}`,
+    },
+    openGraph: {
+      title: `${product.name} — МеталлЛидер`,
+      description: `Цена от ${effectivePrice.toLocaleString("ru-RU")} ₽/${unit}. Доставка по Москве и МО.`,
+      url: `${SITE_URL}/product/${slug}`,
+      type: "website",
+      images: imageUrl
+        ? [{ url: imageUrl.startsWith("http") ? imageUrl : `${SITE_URL}${imageUrl}`, width: 800, height: 800, alt: product.name }]
+        : [],
+    },
   };
 }
 
@@ -65,7 +93,11 @@ export default async function ProductPage({ params }: PageProps) {
   }
 
   const hasDiscount =
-    product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price;
+    !!product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price;
+
+  const discountPercent = hasDiscount
+    ? Math.round(((product.price - product.specialPrice!) / product.price) * 100)
+    : 0;
 
   const unit = unitLabels[product.unit] || "шт";
 
@@ -108,209 +140,318 @@ export default async function ProductPage({ params }: PageProps) {
 
   const mainImage = product.images[0]?.url || null;
 
+  const breadcrumbItems = [
+    { name: "Главная", href: "/" },
+    { name: "Каталог", href: "/catalog" },
+    ...(product.category ? [{ name: product.category.name, href: `/catalog/${product.category.slug}` }] : []),
+    { name: product.name, href: `/product/${product.slug}` },
+  ];
+
   return (
-    <Container className="py-6 lg:py-8">
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">Главная</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/catalog">Каталог</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          {product.category && (
-            <>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={`/catalog/${product.category.slug}`}>
-                    {product.category.name}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </>
-          )}
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{product.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      {/* Product main */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Gallery */}
-        <ProductGallery
-          images={product.images.map((img) => ({ url: img.url }))}
-          name={product.name}
-        />
-
-        {/* Info */}
-        <div>
-          <div className="flex gap-2 mb-3">
-            {product.isHit && (
-              <Badge className="bg-accent text-accent-foreground">Хит</Badge>
-            )}
-            {product.isNew && (
-              <Badge className="bg-emerald-500 text-white">Новинка</Badge>
-            )}
-          </div>
-
-          <h1 className="text-2xl font-bold lg:text-3xl">{product.name}</h1>
-
-          <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-            {product.code && <span>Арт. {product.code}</span>}
-            {product.category && <span>Категория: {product.category.name}</span>}
-          </div>
-
-          <Separator className="my-5" />
-
-          {/* Price */}
-          <div className="flex items-baseline gap-3">
-            {hasDiscount ? (
+    <div className="bg-neutral-50 min-h-screen pb-16">
+      <ProductJsonLd
+        name={product.name}
+        slug={product.slug}
+        description={product.description || `${product.name} — купить в МеталлЛидер с доставкой по Москве и МО.`}
+        price={product.price}
+        specialPrice={product.specialPrice || undefined}
+        code={product.code || undefined}
+        image={mainImage || undefined}
+        inStock={product.stock > 0}
+        category={product.category?.name}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <Container className="py-6 lg:py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Главная</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/catalog">Каталог</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {product.category && (
               <>
-                <span className="text-3xl font-bold text-accent">
-                  {product.specialPrice!.toLocaleString("ru-RU")} &#8381;
-                </span>
-                <span className="text-xl text-muted-foreground line-through">
-                  {product.price.toLocaleString("ru-RU")} &#8381;
-                </span>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href={`/catalog/${product.category.slug}`}>
+                      {product.category.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
               </>
-            ) : (
-              <span className="text-3xl font-bold">
-                {product.price.toLocaleString("ru-RU")} &#8381;
-              </span>
             )}
-            <span className="text-sm text-muted-foreground">/ {unit}</span>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{product.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        {/* Main product section */}
+        <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
+          {/* Left: Gallery */}
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <ProductGallery
+              images={product.images.map((img) => ({ url: img.url }))}
+              name={product.name}
+            />
           </div>
 
-          <p className={`mt-2 text-sm font-medium ${product.stock > 0 ? "text-emerald-600" : "text-red-500"}`}>
-            {product.stock > 0 ? "В наличии на складе" : "Под заказ"}
-          </p>
+          {/* Right: Product info */}
+          <div>
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {product.isHit && (
+                <Badge className="bg-primary text-white text-xs px-3 py-1 rounded-full font-semibold">
+                  Хит продаж
+                </Badge>
+              )}
+              {product.isNew && (
+                <Badge className="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                  Новинка
+                </Badge>
+              )}
+              {hasDiscount && (
+                <Badge className="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                  -{discountPercent}%
+                </Badge>
+              )}
+            </div>
 
-          {/* Quantity + Add to cart */}
-          <AddToCartSection
-            product={{
-              id: product.id,
-              name: product.name,
-              slug: product.slug,
-              code: product.code || "",
-              price: product.price,
-              specialPrice: product.specialPrice || undefined,
-              unit,
-              image: mainImage,
-            }}
-          />
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-neutral-900 lg:text-3xl font-(family-name:--font-unbounded) leading-tight">
+              {product.name}
+            </h1>
 
-          {/* Features */}
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="flex items-center gap-2.5 rounded-lg border p-3">
-              <Truck className="h-5 w-5 text-primary shrink-0" />
-              <div>
-                <p className="text-xs font-medium">Доставка</p>
-                <p className="text-xs text-muted-foreground">По Москве и МО</p>
+            {/* Meta info */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3">
+              {product.code && (
+                <span className="text-sm text-neutral-400">
+                  Арт. <span className="text-neutral-600 font-medium">{product.code}</span>
+                </span>
+              )}
+              {product.category && (
+                <Link
+                  href={`/catalog/${product.category.slug}`}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {product.category.name}
+                </Link>
+              )}
+            </div>
+
+            {/* Price card */}
+            <div className="mt-6 rounded-2xl bg-white border border-neutral-200 p-6">
+              <div className="flex items-end gap-3">
+                {hasDiscount ? (
+                  <>
+                    <span className="text-4xl font-bold text-neutral-900 font-(family-name:--font-unbounded)">
+                      {product.specialPrice!.toLocaleString("ru-RU")} &#8381;
+                    </span>
+                    <span className="text-lg text-neutral-400 line-through mb-1">
+                      {product.price.toLocaleString("ru-RU")} &#8381;
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-4xl font-bold text-neutral-900 font-(family-name:--font-unbounded)">
+                    {product.price.toLocaleString("ru-RU")} &#8381;
+                  </span>
+                )}
+                <span className="text-sm text-neutral-400 mb-1.5">/ {unit}</span>
+              </div>
+
+              {/* Stock status */}
+              <div className="flex items-center gap-2 mt-4">
+                {product.stock > 0 ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <span className="text-sm font-medium text-emerald-600">В наличии на складе</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-medium text-amber-600">Под заказ</span>
+                  </>
+                )}
+              </div>
+
+              {/* Add to cart */}
+              <div className="mt-5">
+                <AddToCartSection
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    code: product.code || "",
+                    price: product.price,
+                    specialPrice: product.specialPrice || undefined,
+                    unit,
+                    image: mainImage,
+                  }}
+                />
+              </div>
+
+              {/* Quick contact */}
+              <div className="flex items-center gap-2 mt-5 pt-5 border-t border-neutral-100">
+                <Phone className="h-4 w-4 text-primary" />
+                <span className="text-sm text-neutral-500">Нужна консультация?</span>
+                <a href="tel:+74957605539" className="text-sm font-semibold text-neutral-900 hover:text-primary transition-colors">
+                  +7 (495) 760-55-39
+                </a>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 rounded-lg border p-3">
-              <Shield className="h-5 w-5 text-primary shrink-0" />
-              <div>
-                <p className="text-xs font-medium">Гарантия</p>
-                <p className="text-xs text-muted-foreground">Сертификат</p>
+
+            {/* Feature cards */}
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-white border border-neutral-200 p-4 text-center">
+                <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10">
+                  <Truck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-neutral-900">Доставка</p>
+                  <p className="text-[11px] text-neutral-400">По Москве и МО</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-white border border-neutral-200 p-4 text-center">
+                <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10">
+                  <Shield className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-neutral-900">Гарантия</p>
+                  <p className="text-[11px] text-neutral-400">Сертификат ГОСТ</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-white border border-neutral-200 p-4 text-center">
+                <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10">
+                  <RotateCcw className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-neutral-900">Возврат</p>
+                  <p className="text-[11px] text-neutral-400">14 дней</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 rounded-lg border p-3">
-              <RotateCcw className="h-5 w-5 text-primary shrink-0" />
-              <div>
-                <p className="text-xs font-medium">Возврат</p>
-                <p className="text-xs text-muted-foreground">14 дней</p>
+
+            {/* Attributes / Specs inline */}
+            {(product.attributes.length > 0 || product.code) && (
+              <div className="mt-4 rounded-2xl bg-white border border-neutral-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-neutral-100">
+                  <h3 className="text-sm font-bold text-neutral-900">Характеристики</h3>
+                </div>
+                <div className="divide-y divide-neutral-50">
+                  {product.code && (
+                    <div className="flex items-center justify-between px-6 py-3">
+                      <span className="text-sm text-neutral-500">Артикул</span>
+                      <span className="text-sm font-medium text-neutral-900">{product.code}</span>
+                    </div>
+                  )}
+                  {product.attributes.map((pa) => (
+                    <div key={pa.id} className="flex items-center justify-between px-6 py-3">
+                      <span className="text-sm text-neutral-500">{pa.attribute.name}</span>
+                      <span className="text-sm font-medium text-neutral-900">
+                        {pa.value}
+                        {pa.attribute.unit && (
+                          <span className="ml-1 text-neutral-400">{pa.attribute.unit}</span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-6 py-3">
+                    <span className="text-sm text-neutral-500">Единица измерения</span>
+                    <span className="text-sm font-medium text-neutral-900">{unit}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Description & Delivery section */}
+        <div className="grid gap-4 lg:grid-cols-2 mt-8">
+          {/* Description */}
+          <div className="rounded-2xl bg-white border border-neutral-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-100">
+              <h3 className="text-sm font-bold text-neutral-900">Описание</h3>
+            </div>
+            <div className="px-6 py-5">
+              <div
+                className="prose prose-sm max-w-none text-neutral-600 prose-headings:text-neutral-900 prose-strong:text-neutral-900"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    product.description ||
+                    `<p>${product.name} — сертифицированная металлопродукция от проверенных производителей. Подходит для строительных, промышленных и бытовых задач. Соответствует стандартам ГОСТ.</p>`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Delivery info */}
+          <div className="rounded-2xl bg-white border border-neutral-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-100">
+              <h3 className="text-sm font-bold text-neutral-900">Доставка и оплата</h3>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-emerald-50 shrink-0 mt-0.5">
+                  <MapPin className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900">Самовывоз — бесплатно</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">АНГАР 4, шоссе Автомагистраль Москва — Нижний Новгород, вл19к4</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-50 shrink-0 mt-0.5">
+                  <Truck className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900">Доставка по Москве — от 1 500 &#8381;</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">По МО рассчитывается индивидуально</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-amber-50 shrink-0 mt-0.5">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900">Срок — 1-3 рабочих дня</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">Точные сроки уточняйте у менеджера</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="description" className="mt-12">
-        <TabsList>
-          <TabsTrigger value="description">Описание</TabsTrigger>
-          <TabsTrigger value="specs">Характеристики</TabsTrigger>
-          <TabsTrigger value="delivery">Доставка</TabsTrigger>
-        </TabsList>
-        <TabsContent value="description" className="mt-4 rounded-xl border bg-card p-6">
-          <div
-            className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground"
-            dangerouslySetInnerHTML={{
-              __html:
-                product.description ||
-                `<p>${product.name} — сертифицированная металлопродукция от проверенных производителей. Подходит для строительных, промышленных и бытовых задач. Соответствует стандартам ГОСТ.</p>`,
-            }}
-          />
-        </TabsContent>
-        <TabsContent value="specs" className="mt-4 rounded-xl border bg-card p-6">
-          <table className="w-full text-sm">
-            <tbody>
-              {product.code && (
-                <tr className="border-b">
-                  <td className="py-2.5 text-muted-foreground w-1/3">Артикул</td>
-                  <td className="py-2.5 font-medium">{product.code}</td>
-                </tr>
-              )}
+        {/* Related products */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-neutral-900 font-(family-name:--font-unbounded)">
+                Похожие товары
+              </h2>
               {product.category && (
-                <tr className="border-b">
-                  <td className="py-2.5 text-muted-foreground">Категория</td>
-                  <td className="py-2.5 font-medium">{product.category.name}</td>
-                </tr>
+                <Link
+                  href={`/catalog/${product.category.slug}`}
+                  className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  Все в категории <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
               )}
-              {product.attributes.map((pa) => (
-                <tr key={pa.id} className="border-b">
-                  <td className="py-2.5 text-muted-foreground">{pa.attribute.name}</td>
-                  <td className="py-2.5 font-medium">
-                    {pa.value}
-                    {pa.attribute.unit && (
-                      <span className="ml-1 text-muted-foreground">{pa.attribute.unit}</span>
-                    )}
-                  </td>
-                </tr>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} {...p} />
               ))}
-              <tr className="border-b">
-                <td className="py-2.5 text-muted-foreground">Единица измерения</td>
-                <td className="py-2.5 font-medium">{unit}</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 text-muted-foreground">Наличие</td>
-                <td className={`py-2.5 font-medium ${product.stock > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                  {product.stock > 0 ? "В наличии" : "Под заказ"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </TabsContent>
-        <TabsContent value="delivery" className="mt-4 rounded-xl border bg-card p-6">
-          <div className="space-y-3 text-sm text-muted-foreground">
-            <p><strong className="text-foreground">Самовывоз:</strong> бесплатно, АНГАР 4, шоссе Автомагистраль Москва — Нижний Новгород, вл19к4</p>
-            <p><strong className="text-foreground">Доставка по Москве:</strong> от 1500 &#8381;, в зависимости от объёма заказа</p>
-            <p><strong className="text-foreground">Доставка по МО:</strong> рассчитывается индивидуально</p>
-            <p><strong className="text-foreground">Срок доставки:</strong> 1-3 рабочих дня</p>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Related */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-12">
-          <h2 className="mb-6 text-2xl font-bold">Похожие товары</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} {...p} />
-            ))}
-          </div>
-        </section>
-      )}
-    </Container>
+            </div>
+          </section>
+        )}
+      </Container>
+    </div>
   );
 }

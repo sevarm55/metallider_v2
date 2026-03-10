@@ -10,6 +10,7 @@ interface RateLimitOptions {
 export const rateLimitConfig = {
   login: { interval: 15 * 60 * 1000, uniqueTokenPerInterval: 5 },
   register: { interval: 15 * 60 * 1000, uniqueTokenPerInterval: 3 },
+  "forgot-password": { interval: 15 * 60 * 1000, uniqueTokenPerInterval: 5 },
   api: { interval: 60 * 1000, uniqueTokenPerInterval: 60 },
   admin: { interval: 60 * 1000, uniqueTokenPerInterval: 30 },
 } as const;

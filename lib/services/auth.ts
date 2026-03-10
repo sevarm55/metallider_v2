@@ -35,3 +35,19 @@ export const verifyCode = async (code: string) => {
   });
   return data;
 };
+
+export const forgotPassword = async (email: string) => {
+  const { data } = await axiosInstance.post<ApiResponse>("/auth/forgot-password", {
+    email,
+  });
+  return data;
+};
+
+export const resetPassword = async (email: string, code: string, newPassword: string) => {
+  const { data } = await axiosInstance.post<ApiResponse>("/auth/reset-password", {
+    email,
+    code,
+    newPassword,
+  });
+  return data;
+};

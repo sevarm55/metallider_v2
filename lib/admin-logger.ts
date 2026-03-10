@@ -15,7 +15,12 @@ export type AdminAction =
   | "CHANGE_PASSWORD"
   | "UPDATE_SETTINGS"
   | "SYNC_MOYSKLAD"
-  | "IMPORT_PRODUCTS";
+  | "IMPORT_PRODUCTS"
+  | "CREATE_ATTRIBUTE"
+  | "UPDATE_ATTRIBUTE"
+  | "DELETE_ATTRIBUTE"
+  | "SYNC_MOYSKLAD_STOCK"
+  | "BULK_ADD_IMAGE";
 
 interface LogAdminActionParams {
   userId: string;

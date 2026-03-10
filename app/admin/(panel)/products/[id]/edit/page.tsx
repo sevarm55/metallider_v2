@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Upload, X, CloudDownload, Eraser, Wand2, Plus, Trash2, Download } from "lucide-react";
+import { ArrowLeft, Upload, X, CloudDownload, Eraser, Wand2, Plus, Trash2, Download, Copy } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,7 @@ export default function EditProductPage() {
   const [availableAttributes, setAvailableAttributes] = useState<AttributeDef[]>([]);
   const [productAttributes, setProductAttributes] = useState<ProductAttributeData[]>([]);
   const [withDimensions, setWithDimensions] = useState(true);
+  const [applyingToCategory, setApplyingToCategory] = useState(false);
 
   const {
     register,
@@ -341,6 +342,38 @@ export default function EditProductPage() {
       }
     } finally {
       setFetchingMs(false);
+    }
+  }
+
+  async function handleApplyImageToCategory() {
+    const catId = watch("categoryId");
+    if (!catId || images.length === 0) return;
+
+    setApplyingToCategory(true);
+    try {
+      const res = await axiosInstance.post("/admin/products/bulk-image", {
+        categoryId: catId,
+        imageUrl: images[0], // Используем главное фото
+      });
+      if (res.data.success) {
+        const { updated, replaced, added } = res.data.data;
+        if (updated > 0) {
+          const parts = [];
+          if (replaced > 0) parts.push(`заменено у ${replaced}`);
+          if (added > 0) parts.push(`добавлено к ${added}`);
+          toast.success(`Фото обновлено: ${parts.join(", ")} товаров`);
+        } else {
+          toast.info("Нет товаров в этой категории");
+        }
+      }
+    } catch (err) {
+      if (err instanceof AxiosError && err.response?.data) {
+        toast.error((err.response.data as ApiErrorResponse).error);
+      } else {
+        toast.error("Ошибка применения фото");
+      }
+    } finally {
+      setApplyingToCategory(false);
     }
   }
 
@@ -635,6 +668,22 @@ export default function EditProductPage() {
                     </div>
                   </label>
                 </div>
+
+                {images.length > 0 && watch("categoryId") && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 w-full gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                    onClick={handleApplyImageToCategory}
+                    disabled={applyingToCategory}
+                  >
+                    <Copy className={`h-4 w-4 ${applyingToCategory ? "animate-pulse" : ""}`} />
+                    {applyingToCategory
+                      ? "Применяем..."
+                      : "Применить фото для всей категории"}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
