@@ -115,7 +115,7 @@ export function SearchBar() {
       {/* Trigger button in header */}
       <button
         onClick={openModal}
-        className="hidden md:flex flex-1 items-center gap-3 h-11 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-400 hover:border-neutral-300 hover:bg-white transition-all cursor-text"
+        className="hidden md:flex flex-1 items-center gap-3 h-9 rounded-lg border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-400 hover:border-neutral-300 hover:bg-white transition-all cursor-text"
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 text-left">Поиск по каталогу...</span>

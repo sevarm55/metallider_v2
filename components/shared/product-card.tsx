@@ -204,40 +204,28 @@ export function ProductCard({
 
         <div className="relative bg-white m-1.5 mb-0 rounded-2xl rounded-br-none overflow-hidden">
 
-          {/* Badges row */}
-
-          <div className="absolute left-0 top-3 z-20 flex flex-col gap-1.5">
-
-            {hasDiscount && (
-
-              <span className="rounded-r-lg bg-red-500 pl-3 pr-2.5 py-1 text-[10px] font-black text-white">
-
-                -{discountPercent}%
-
+          {/* Discount badge */}
+          {hasDiscount && (
+            <div className="absolute -left-2 -top-2 z-20 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-red-500 to-rose-600 shadow-xl shadow-red-500/40 ring-[3px] ring-white pointer-events-none">
+              <span className="text-lg font-black text-white leading-none">
+                -{discountPercent}
+                <span className="text-[10px]">%</span>
               </span>
+            </div>
+          )}
 
-            )}
-
+          {/* Badges */}
+          <div className="absolute left-0 z-20 flex flex-col gap-1.5" style={{ top: hasDiscount ? "4.5rem" : "0.75rem" }}>
             {isHit && (
-
               <span className="rounded-r-lg bg-primary pl-3 pr-2.5 py-1 text-[10px] font-black uppercase text-white">
-
                 Хит
-
               </span>
-
             )}
-
             {isNew && (
-
               <span className="rounded-r-lg bg-emerald-500 pl-3 pr-2.5 py-1 text-[10px] font-black uppercase text-white">
-
                 New
-
               </span>
-
             )}
-
           </div>
 
 
@@ -414,7 +402,7 @@ export function ProductCard({
                 &#8381;/{unit}
               </span>
               {hasDiscount && (
-                <span className="text-[10px] text-white/50 line-through">
+                <span className="text-[11px] font-semibold text-white/80 line-through">
                   {price.toLocaleString("ru-RU")}
                 </span>
               )}
@@ -492,6 +480,12 @@ export function ProductCard({
                 value={qty}
 
                 onChange={setQty}
+
+                step={unit === "м²" ? 0.5 : 1}
+
+                min={unit === "м²" ? 0.5 : 1}
+
+                unit={unit}
 
                 className="h-9 w-auto rounded-lg bg-white/10 border-0 text-white"
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { SidebarProvider, useSidebar } from "../_components/sidebar-context";
 import { AdminSidebar } from "../_components/admin-sidebar";
@@ -7,6 +9,14 @@ import { AdminHeader } from "../_components/admin-header";
 
 function PanelContent({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
+  const pathname = usePathname();
+
+  // Clear product filters when navigating away from products section
+  useEffect(() => {
+    if (!pathname.startsWith("/admin/products")) {
+      sessionStorage.removeItem("admin_products_filters");
+    }
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen bg-[#f5f5f5]">

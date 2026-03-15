@@ -1,0 +1,28 @@
+{
+  "name": "МеталлЛидер — Металлопрокат",
+  "short_name": "МеталлЛидер",
+  "description": "Интернет-магазин металлопроката: трубы, арматура, листы, уголки, швеллеры. Доставка по Москве и МО.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "ru",
+  "categories": ["shopping", "business"]
+}
