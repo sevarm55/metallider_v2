@@ -214,6 +214,9 @@ function ListItem({ product }: { product: Product }) {
             size="sm"
             value={qty}
             onChange={setQty}
+            step={product.unit === "м²" ? 0.5 : 1}
+            min={product.unit === "м²" ? 0.5 : 1}
+            unit={product.unit}
             className="h-8 w-auto rounded-lg bg-white/10 border-0 text-white"
           />
           <button
@@ -402,6 +405,9 @@ function TableRowItem({ product }: { product: Product }) {
             size="sm"
             value={qty}
             onChange={setQty}
+            step={product.unit === "м²" ? 0.5 : 1}
+            min={product.unit === "м²" ? 0.5 : 1}
+            unit={product.unit}
             className="h-9 w-auto rounded-lg bg-white/10 border-0 text-white"
           />
         </div>

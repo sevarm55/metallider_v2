@@ -11,9 +11,7 @@ import {
   Building2,
   CheckCircle2,
   User,
-  Phone,
   Mail,
-  Shield,
   Truck,
 } from "lucide-react";
 import { Container } from "@/components/shared/container";
@@ -70,6 +68,7 @@ export default function CartPage() {
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   const handleSubmitOrder = async () => {
     if (!name.trim() || !phone.trim()) {
@@ -93,15 +92,11 @@ export default function CartPage() {
           deliveryMethod,
           address: address.trim() || undefined,
           comment: comment.trim() || undefined,
+          // TODO: Серверный API /api/orders должен сам рассчитывать цены по ID товаров
           items: items.map((i) => ({
             id: i.product.id,
-            name: i.product.name,
-            price: i.product.price,
-            specialPrice: i.product.specialPrice,
             quantity: i.quantity,
-            unit: i.product.unit,
           })),
-          totalPrice,
         }),
       });
       const data = await res.json();
@@ -274,6 +269,9 @@ export default function CartPage() {
                             size="sm"
                             value={item.quantity}
                             onChange={(q) => updateQuantity(product.id, q)}
+                            step={product.unit === "м²" ? 0.5 : 1}
+                            min={product.unit === "м²" ? 0.5 : 1}
+                            unit={product.unit}
                             className="h-8 w-auto rounded-lg bg-neutral-100 border-0"
                           />
                           <span className="hidden sm:inline text-xs text-neutral-500">
@@ -281,14 +279,14 @@ export default function CartPage() {
                             {hasDiscount ? (
                               <>
                                 <span className="text-primary font-medium">
-                                  {effectivePrice.toLocaleString("ru-RU")} &#8381;
+                                  {effectivePrice.toLocaleString("ru-RU")} &#8381;/{product.unit}
                                 </span>
                                 <span className="ml-1 line-through text-neutral-500">
                                   {product.price.toLocaleString("ru-RU")}
                                 </span>
                               </>
                             ) : (
-                              <>{effectivePrice.toLocaleString("ru-RU")} &#8381;</>
+                              <>{effectivePrice.toLocaleString("ru-RU")} &#8381;/{product.unit}</>
                             )}
                           </span>
                         </div>
@@ -302,186 +300,171 @@ export default function CartPage() {
               })}
             </div>
 
-            {/* ── Step sections with timeline ── */}
-            <div className="relative pl-8 sm:pl-12 before:absolute before:left-[13px] before:sm:left-[21px] before:top-0 before:bottom-0 before:w-px before:bg-neutral-200">
+            {/* ── Checkout form ── */}
+            <div className="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200/60">
+              {/* Decorative glow */}
+              <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
 
-            {/* Contact info */}
-            <div className="relative mb-6">
-              <div className="absolute -left-8 sm:-left-12 top-6 flex h-7 w-7 sm:h-[42px] sm:w-[42px] items-center justify-center rounded-full bg-primary text-white text-xs sm:text-sm font-black ring-4 ring-white z-10">
-                1
-              </div>
-              <div className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded) mb-6">Контактные данные</h2>
-                <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-                        <div className="flex h-5 w-5 items-center justify-center rounded bg-primary/10">
-                          <User className="h-3 w-3 text-primary" />
-                        </div>
-                        Имя <span className="text-primary">*</span>
-                      </label>
-                      <Input
-                        placeholder="Ваше имя"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="h-12 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
-                      />
+              {/* Watermark */}
+              <span className="pointer-events-none absolute right-4 top-2 select-none text-[5rem] font-black leading-none text-neutral-100/60 font-(family-name:--font-unbounded)">
+                ЗАКАЗ
+              </span>
+
+              <div className="relative divide-y divide-neutral-100">
+                {/* ── Section: Contact ── */}
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                      <User className="h-4 w-4 text-primary" />
                     </div>
-                    <div>
-                      <label className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-                        <div className="flex h-5 w-5 items-center justify-center rounded bg-primary/10">
-                          <Phone className="h-3 w-3 text-primary" />
-                        </div>
-                        Телефон <span className="text-primary">*</span>
-                      </label>
-                      <Input
-                        type="tel"
-                        placeholder="+7 (999) 123-45-67"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="h-12 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
-                      />
-                    </div>
+                    <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Контактные данные</h2>
                   </div>
-                  <div>
-                    <label className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-                      <div className="flex h-5 w-5 items-center justify-center rounded bg-primary/10">
-                        <Mail className="h-3 w-3 text-primary" />
-                      </div>
-                      Email
-                    </label>
-                    <Input
-                      type="email"
-                      placeholder="email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery method */}
-            <div className="relative mb-6">
-              <div className="absolute -left-8 sm:-left-12 top-6 flex h-7 w-7 sm:h-[42px] sm:w-[42px] items-center justify-center rounded-full bg-primary text-white text-xs sm:text-sm font-black ring-4 ring-white z-10">
-                2
-              </div>
-              <div className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded) mb-5">Способ получения</h2>
-                <div className="space-y-3">
-                  {/* Самовывоз */}
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryMethod("pickup")}
-                    className={cn(
-                      "w-full rounded-2xl text-left transition-all duration-200 overflow-hidden",
-                      deliveryMethod === "pickup"
-                        ? "bg-zinc-800 shadow-lg"
-                        : "bg-neutral-50 hover:bg-neutral-100",
-                    )}
-                  >
-                    <div className="flex items-center gap-4 p-4">
-                      <div className={cn(
-                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all",
-                        deliveryMethod === "pickup" ? "bg-primary text-white" : "bg-neutral-200 text-neutral-400",
-                      )}>
-                        <Building2 className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm font-bold", deliveryMethod === "pickup" ? "text-white" : "text-neutral-600")}>
-                          Самовывоз со склада
-                        </p>
-                        <p className={cn("text-[11px]", deliveryMethod === "pickup" ? "text-emerald-400 font-semibold" : "text-neutral-400")}>
-                          Бесплатно
-                        </p>
-                      </div>
-                      <div className={cn(
-                        "flex h-6 w-6 items-center justify-center rounded-full shrink-0 transition-all",
-                        deliveryMethod === "pickup" ? "bg-primary" : "border-2 border-neutral-300",
-                      )}>
-                        {deliveryMethod === "pickup" && (
-                          <CheckCircle2 className="h-4 w-4 text-white" />
-                        )}
-                      </div>
-                    </div>
-                    {deliveryMethod === "pickup" && (
-                      <div className="border-t border-white/10 bg-white/5 px-4 py-3 flex items-center gap-2.5">
-                        <MapPin className="h-4 w-4 text-primary shrink-0" />
-                        <p className="text-xs text-neutral-400">
-                          <span className="font-semibold text-neutral-300">Склад МеталлЛидер</span> — Реутов, ш. Автомагистраль Москва — Нижний Новгород, 1
-                        </p>
-                      </div>
-                    )}
-                  </button>
-
-                  {/* Доставка */}
-                  <div
-                    onClick={() => setDeliveryMethod("delivery")}
-                    className={cn(
-                      "w-full rounded-2xl text-left transition-all duration-200 cursor-pointer overflow-hidden",
-                      deliveryMethod === "delivery"
-                        ? "bg-zinc-800 shadow-lg"
-                        : "bg-neutral-50 hover:bg-neutral-100",
-                    )}
-                  >
-                    <div className="flex items-center gap-4 p-4">
-                      <div className={cn(
-                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all",
-                        deliveryMethod === "delivery" ? "bg-primary text-white" : "bg-neutral-200 text-neutral-400",
-                      )}>
-                        <Truck className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm font-bold", deliveryMethod === "delivery" ? "text-white" : "text-neutral-600")}>
-                          Доставка
-                        </p>
-                        <p className={cn("text-[11px]", deliveryMethod === "delivery" ? "text-neutral-400" : "text-neutral-400")}>
-                          По Москве и Московской области
-                        </p>
-                      </div>
-                      <div className={cn(
-                        "flex h-6 w-6 items-center justify-center rounded-full shrink-0 transition-all",
-                        deliveryMethod === "delivery" ? "bg-primary" : "border-2 border-neutral-300",
-                      )}>
-                        {deliveryMethod === "delivery" && (
-                          <CheckCircle2 className="h-4 w-4 text-white" />
-                        )}
-                      </div>
-                    </div>
-                    {deliveryMethod === "delivery" && (
-                      <div className="border-t border-white/10 bg-white/5 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <div className="space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-neutral-400">
+                          Имя <span className="text-primary">*</span>
+                        </label>
                         <Input
-                          placeholder="Введите адрес доставки..."
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          className="h-11 rounded-xl border-0 bg-white/10 text-white placeholder:text-neutral-500 focus-visible:ring-1 focus-visible:ring-primary"
+                          placeholder="Ваше имя"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="h-11 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
                         />
                       </div>
-                    )}
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-neutral-400">
+                          Телефон <span className="text-primary">*</span>
+                        </label>
+                        <Input
+                          type="tel"
+                          placeholder="+7 (999) 123-45-67"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="h-11 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-[11px] font-semibold text-neutral-400">
+                        Email <span className="text-neutral-300">(необязательно)</span>
+                      </label>
+                      <Input
+                        type="email"
+                        placeholder="email@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-11 rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Comment */}
-            <div className="relative">
-              <div className="absolute -left-8 sm:-left-12 top-6 flex h-7 w-7 sm:h-[42px] sm:w-[42px] items-center justify-center rounded-full bg-primary text-white text-xs sm:text-sm font-black ring-4 ring-white z-10">
-                3
-              </div>
-              <div className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded) mb-4">Комментарий</h2>
-                <Textarea
-                  placeholder="Дополнительные пожелания, удобное время доставки и т.д."
-                  rows={3}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary resize-none transition-all"
-                />
-              </div>
-            </div>
+                {/* ── Section: Delivery ── */}
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                      <Truck className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Способ получения</h2>
+                  </div>
 
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {/* Самовывоз */}
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryMethod("pickup")}
+                      className={cn(
+                        "group relative rounded-xl p-4 text-left transition-all duration-200 overflow-hidden",
+                        deliveryMethod === "pickup"
+                          ? "bg-primary/5 ring-2 ring-primary"
+                          : "bg-neutral-50 ring-1 ring-neutral-200 hover:bg-neutral-100",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all",
+                          deliveryMethod === "pickup" ? "bg-primary text-white" : "bg-neutral-200 text-neutral-400",
+                        )}>
+                          <Building2 className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className={cn("text-sm font-bold", deliveryMethod === "pickup" ? "text-neutral-900" : "text-neutral-700")}>
+                            Самовывоз
+                          </p>
+                          <p className={cn("text-[11px]", deliveryMethod === "pickup" ? "text-emerald-600 font-semibold" : "text-neutral-400")}>
+                            Бесплатно
+                          </p>
+                        </div>
+                      </div>
+                      {deliveryMethod === "pickup" && (
+                        <div className="mt-3 flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2">
+                          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <p className="text-[11px] text-neutral-500 leading-snug">
+                            Реутов, ш. Автомагистраль Москва — Нижний Новгород, 1
+                          </p>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Доставка */}
+                    <div
+                      onClick={() => setDeliveryMethod("delivery")}
+                      className={cn(
+                        "group relative rounded-xl p-4 text-left transition-all duration-200 cursor-pointer overflow-hidden",
+                        deliveryMethod === "delivery"
+                          ? "bg-primary/5 ring-2 ring-primary"
+                          : "bg-neutral-50 ring-1 ring-neutral-200 hover:bg-neutral-100",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all",
+                          deliveryMethod === "delivery" ? "bg-primary text-white" : "bg-neutral-200 text-neutral-400",
+                        )}>
+                          <Truck className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className={cn("text-sm font-bold", deliveryMethod === "delivery" ? "text-neutral-900" : "text-neutral-700")}>
+                            Доставка
+                          </p>
+                          <p className={cn("text-[11px]", deliveryMethod === "delivery" ? "text-neutral-500" : "text-neutral-400")}>
+                            Москва и МО
+                          </p>
+                        </div>
+                      </div>
+                      {deliveryMethod === "delivery" && (
+                        <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                          <Input
+                            placeholder="Адрес доставки..."
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            className="h-10 rounded-lg border-neutral-200 bg-neutral-50 text-sm placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Section: Comment ── */}
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                      <Mail className="h-4 w-4 text-violet-500" />
+                    </div>
+                    <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Комментарий</h2>
+                    <span className="text-[11px] text-neutral-300">(необязательно)</span>
+                  </div>
+                  <Textarea
+                    placeholder="Удобное время, особые пожелания..."
+                    rows={2}
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="rounded-xl border-neutral-200 bg-neutral-50 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary resize-none transition-all"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -533,11 +516,29 @@ export default function CartPage() {
                     <p className="text-sm text-center text-red-400 font-medium">{error}</p>
                   </div>
                 )}
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary accent-primary"
+                  />
+                  <span className="text-[11px] text-neutral-500 leading-snug">
+                    Я соглашаюсь с{" "}
+                    <Link href="/privacy" className="text-primary hover:underline">
+                      Политикой конфиденциальности
+                    </Link>{" "}
+                    и{" "}
+                    <Link href="/offer" className="text-primary hover:underline">
+                      Публичной офертой
+                    </Link>
+                  </span>
+                </label>
                 <Button
                   size="lg"
                   className="w-full font-bold text-base rounded-xl h-12"
                   onClick={handleSubmitOrder}
-                  disabled={submitting}
+                  disabled={submitting || !consent}
                 >
                   {submitting ? (
                     <>
@@ -548,9 +549,13 @@ export default function CartPage() {
                     "Оформить заказ"
                   )}
                 </Button>
-                <div className="flex items-center justify-center gap-1.5 text-[11px] text-neutral-500">
-                  <Shield className="h-3 w-3" />
-                  Безопасная оплата
+                <div className="rounded-xl bg-emerald-50 border border-emerald-200/50 px-3 py-2.5 text-center">
+                  <p className="text-[11px] font-semibold text-emerald-700">
+                    Оплата при получении
+                  </p>
+                  <p className="text-[10px] text-emerald-600/70 mt-0.5">
+                    Наличными или картой
+                  </p>
                 </div>
               </div>
             </div>

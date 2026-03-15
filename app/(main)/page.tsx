@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Truck, Shield, BadgePercent, Headset, ArrowRight, MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
-import { HeroCarousel } from "@/components/shared/hero-carousel";
+import { HeroBento } from "@/components/shared/hero-bento";
 import { ProductCard } from "@/components/shared/product-card";
 import { MetalCalculator } from "@/components/shared/metal-calculator";
 import { CustomerReviews } from "@/components/shared/customer-reviews";
@@ -107,10 +107,10 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section>
-        <Container className="py-6">
-          <HeroCarousel />
+      {/* Hero Bento */}
+      <section className="bg-neutral-50">
+        <Container className="py-4">
+          <HeroBento />
         </Container>
       </section>
 

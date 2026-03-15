@@ -41,3 +41,15 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# uploads (dynamic content)
+/public/uploads/
+
+# temporary files
+/tmp/
+
+# generated image prompts
+/public/images/categories/prompts.json
+/public/images/categories/index.html
+
+catalog.txt

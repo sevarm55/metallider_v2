@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -56,22 +56,45 @@ interface Product {
 }
 
 const PAGE_SIZE = 50;
+const FILTER_STORAGE_KEY = "admin_products_filters";
+
+function loadSavedFilters() {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(FILTER_STORAGE_KEY);
+    if (raw) return JSON.parse(raw) as { page?: number; search?: string; categoryId?: string };
+  } catch {}
+  return {};
+}
+
+function saveFilters(filters: { page: number; search: string; categoryId: string }) {
+  try {
+    sessionStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
+  } catch {}
+}
 
 export default function ProductsPage() {
+  const savedFilters = useRef(loadSavedFilters());
+
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
+  const [page, setPage] = useState(savedFilters.current.page || 1);
+  const [search, setSearch] = useState(savedFilters.current.search || "");
+  const [searchInput, setSearchInput] = useState(savedFilters.current.search || "");
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncingStock, setSyncingStock] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(savedFilters.current.categoryId || "");
   const [showFilter, setShowFilter] = useState(false);
+
+  // Save filters to sessionStorage whenever they change
+  useEffect(() => {
+    saveFilters({ page, search, categoryId });
+  }, [page, search, categoryId]);
 
   const loadProducts = useCallback(async (p: number, s: string, catId: string) => {
     setLoading(true);

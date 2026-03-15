@@ -19,7 +19,9 @@ const infoLinks = [
   { label: "Оплата", href: "/payment" },
   { label: "О компании", href: "/about" },
   { label: "Контакты", href: "/contacts" },
+  { label: "Акции", href: "/promotions" },
   { label: "Политика конфиденциальности", href: "/privacy" },
+  { label: "Публичная оферта", href: "/offer" },
 ];
 
 export function Footer() {

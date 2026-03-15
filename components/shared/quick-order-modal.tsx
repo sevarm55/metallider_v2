@@ -23,6 +23,7 @@ export function QuickOrderModal({ open, onClose, product }: QuickOrderModalProps
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [consent, setConsent] = useState(false);
 
   if (!open || !product) return null;
 
@@ -65,6 +66,7 @@ export function QuickOrderModal({ open, onClose, product }: QuickOrderModalProps
       setPhone("");
       setSent(false);
       setError("");
+      setConsent(false);
     }, 300);
   };
 
@@ -146,7 +148,25 @@ export function QuickOrderModal({ open, onClose, product }: QuickOrderModalProps
                 className="h-11 w-full rounded-lg border border-neutral-200 px-4 text-sm outline-none focus:border-primary transition-colors"
               />
               {error && <p className="text-xs text-red-500">{error}</p>}
-              <Button type="submit" className="w-full h-11 gap-2 bg-amber-500 hover:bg-amber-600 text-white" disabled={loading}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary accent-primary"
+                />
+                <span className="text-[11px] text-neutral-500 leading-snug">
+                  Я соглашаюсь с{" "}
+                  <a href="/privacy" target="_blank" className="text-primary hover:underline">
+                    Политикой конфиденциальности
+                  </a>{" "}
+                  и{" "}
+                  <a href="/offer" target="_blank" className="text-primary hover:underline">
+                    Публичной офертой
+                  </a>
+                </span>
+              </label>
+              <Button type="submit" className="w-full h-11 gap-2 bg-amber-500 hover:bg-amber-600 text-white" disabled={loading || !consent}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                   <>
                     <Zap className="h-4 w-4" />
