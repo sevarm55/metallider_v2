@@ -38,6 +38,10 @@ export const authOptions: AuthOptions = {
           throw new Error("NOT_VERIFIED");
         }
 
+        if (!user.password || !user.password.startsWith("$2")) {
+          throw new Error("INVALID_CREDENTIALS");
+        }
+
         const isPasswordValid = await compare(
           credentials.password,
           user.password,
@@ -46,6 +50,51 @@ export const authOptions: AuthOptions = {
         if (!isPasswordValid) {
           throw new Error("INVALID_CREDENTIALS");
         }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.fullName,
+          role: user.role,
+          phone: user.phone ?? undefined,
+        };
+      },
+    }),
+    CredentialsProvider({
+      id: "phone-credentials",
+      name: "Phone",
+      credentials: {
+        phone: { label: "Phone", type: "text" },
+        code: { label: "Code", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.phone || !credentials?.code) return null;
+
+        // Нормализация телефона (убираем пробелы, дефисы, скобки; 8→+7)
+        let phone = credentials.phone.replace(/[\s\-()]/g, "");
+        if (phone.startsWith("8")) phone = "+7" + phone.slice(1);
+        if (!phone.startsWith("+")) phone = "+" + phone;
+
+        // Поиск пользователя по телефону
+        const user = await prisma.user.findFirst({ where: { phone } });
+        if (!user) return null;
+        if (!user.isActive) throw new Error("ACCOUNT_DISABLED");
+
+        // Поиск и валидация кода подтверждения
+        const record = await prisma.verificationCode.findFirst({
+          where: { userId: user.id, code: credentials.code },
+        });
+        if (!record) throw new Error("INVALID_CODE");
+
+        // Проверка TTL — 5 минут
+        const elapsed = Date.now() - record.createdAt.getTime();
+        if (elapsed > 5 * 60 * 1000) {
+          await prisma.verificationCode.delete({ where: { id: record.id } });
+          throw new Error("CODE_EXPIRED");
+        }
+
+        // Удаление использованного кода
+        await prisma.verificationCode.delete({ where: { id: record.id } });
 
         return {
           id: user.id,

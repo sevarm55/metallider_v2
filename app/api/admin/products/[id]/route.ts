@@ -61,6 +61,7 @@ export async function DELETE(
     // Delete related records, then product
     await prisma.$transaction([
       prisma.cartItem.deleteMany({ where: { productId: id } }),
+      prisma.orderItem.deleteMany({ where: { productId: id } }),
       prisma.productAttribute.deleteMany({ where: { productId: id } }),
       prisma.productImage.deleteMany({ where: { productId: id } }),
       prisma.productItem.deleteMany({ where: { productId: id } }),
@@ -146,7 +147,7 @@ export async function PUT(
           specialPrice: data.specialPrice || 0,
           unit: data.unit,
           stock: data.stock,
-          isActive: data.isActive,
+          isActive: data.stock <= 0 ? false : data.isActive,
           isHit: data.isHit,
           isNew: data.isNew,
           images:

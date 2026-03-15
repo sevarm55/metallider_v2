@@ -30,6 +30,7 @@ import { AxiosError } from "axios";
 interface Category {
   id: string;
   name: string;
+  parentId: string | null;
 }
 
 type CsvRow = Record<string, string>;
@@ -149,8 +150,38 @@ export default function ImportProductsPage() {
   function resolveCategoryId(raw: string): string | null {
     if (!raw) return null;
     const lower = raw.toLowerCase().trim();
-    const cat = categories.find((c) => c.name.toLowerCase() === lower);
-    return cat?.id || null;
+
+    // 1. Exact match
+    const exact = categories.find((c) => c.name.toLowerCase() === lower);
+    if (exact) return exact.id;
+
+    // 2. Alias map for common CSV abbreviations → DB subcategory names
+    const ALIASES: Record<string, string> = {
+      "труба квадрат": "труба профильная квадратная",
+      "труба проф": "труба профильная прямоугольная",
+      "лист горя": "лист горячекатаный",
+      "лист оцинк": "лист оцинкованный",
+      "лист пвл": "лист пвл",
+      "труба оцинк": "труба оцинкованная",
+      "труба элсвар": "труба электросварная",
+      "лист": "лист х/к и г/к",
+    };
+
+    const alias = ALIASES[lower];
+    if (alias) {
+      const aliased = categories.find((c) => c.name.toLowerCase() === alias);
+      if (aliased) return aliased.id;
+    }
+
+    // 3. Fuzzy: CSV name starts with DB subcategory name or vice versa (only subcategories)
+    const subcategories = categories.filter((c) => c.parentId);
+    const fuzzy = subcategories.find((c) => {
+      const cLower = c.name.toLowerCase();
+      return cLower.startsWith(lower) || lower.startsWith(cLower);
+    });
+    if (fuzzy) return fuzzy.id;
+
+    return null;
   }
 
   function buildProducts() {

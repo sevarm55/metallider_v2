@@ -134,6 +134,24 @@ async function addWatermark(imageBuffer: Buffer): Promise<Buffer> {
 }
 
 /**
+ * Генерирует изображение категории металлопроката.
+ * Тёмный фон, стиль каталога, подходящее для карточки категории.
+ */
+export async function generateCategoryImage(
+  categoryName: string,
+): Promise<string> {
+  const result = await fal.subscribe("fal-ai/nano-banana-pro", {
+    input: {
+      prompt: `Ultra-realistic professional product photography of ${categoryName} (hot-rolled steel/metal products). Thin-walled steel, 2-3mm wall thickness, realistic proportions like real steel products from a metal warehouse. Dark grey metal surface with mill scale texture, hot-rolled black steel finish, no rust, no corrosion, clean dark metal. Several pieces arranged on light grey concrete floor, soft studio lighting, light neutral background, realistic metal texture, dark oxide coating, industrial warehouse feel, DSLR quality, 85mm lens, shallow depth of field, photorealistic, no text, no watermarks, no people, no logos.`,
+      aspect_ratio: "16:9",
+      num_images: 1,
+    },
+  });
+
+  return (result.data as FalImagesResult).images[0].url;
+}
+
+/**
  * Скачивает изображение по URL и сохраняет в public/uploads/products/.
  * Для сгенерированных фото накладывает водяной знак.
  */
@@ -157,9 +175,10 @@ export async function downloadAndSave(
   const fs = await import("fs/promises");
   const path = await import("path");
 
-  const dir = path.join(process.cwd(), "public/uploads/products");
+  const subDir = suffix === "category" ? "categories" : "products";
+  const dir = path.join(process.cwd(), `public/uploads/${subDir}`);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, filename), buffer);
 
-  return `/uploads/products/${filename}`;
+  return `/uploads/${subDir}/${filename}`;
 }

@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { LayoutGrid, List, ShoppingCart, Package, Check, Loader2 } from "lucide-react";
+import {
+  LayoutGrid,
+  Rows3,
+  List,
+  ShoppingCart,
+  Package,
+  Check,
+  Loader2,
+  Heart,
+} from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
+import { useFavoritesStore } from "@/lib/store/favorites";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Toggle } from "@/components/ui/toggle";
 import { ProductCard } from "./product-card";
 import { QuantitySelector } from "./quantity-selector";
@@ -41,7 +41,7 @@ interface ProductsViewProps {
 }
 
 export function ProductsView({ products }: ProductsViewProps) {
-  const [view, setView] = useState<"grid" | "table">("grid");
+  const [view, setView] = useState<"grid" | "list" | "table">("grid");
 
   return (
     <div>
@@ -61,6 +61,15 @@ export function ProductsView({ products }: ProductsViewProps) {
             <LayoutGrid className="h-4 w-4" />
           </Toggle>
           <Toggle
+            pressed={view === "list"}
+            onPressedChange={() => setView("list")}
+            size="sm"
+            aria-label="Список"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          >
+            <Rows3 className="h-4 w-4" />
+          </Toggle>
+          <Toggle
             pressed={view === "table"}
             onPressedChange={() => setView("table")}
             size="sm"
@@ -78,28 +87,160 @@ export function ProductsView({ products }: ProductsViewProps) {
             <ProductCard key={product.id} {...product} />
           ))}
         </div>
+      ) : view === "list" ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
+            <ListItem key={product.id} product={product} />
+          ))}
+        </div>
       ) : (
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[60px]">Фото</TableHead>
-                <TableHead className="w-[100px]">Артикул</TableHead>
-                <TableHead>Название</TableHead>
-                <TableHead className="w-[120px] text-right">Цена</TableHead>
-                <TableHead className="w-[50px] text-center">Ед.</TableHead>
-                <TableHead className="w-[120px] text-center">Кол-во</TableHead>
-                <TableHead className="w-[110px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRowItem key={product.id} product={product} />
-              ))}
-            </TableBody>
-          </Table>
+        <div className="space-y-2">
+          {products.map((product) => (
+            <TableRowItem key={product.id} product={product} />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ListItem({ product }: { product: Product }) {
+  const [qty, setQty] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
+  const addItem = useCartStore((s) => s.addItem);
+  const toggle = useFavoritesStore((s) => s.toggle);
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(product.id));
+
+  const hasDiscount =
+    product.specialPrice &&
+    product.specialPrice > 0 &&
+    product.specialPrice < product.price;
+
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    code: product.code,
+    price: product.price,
+    specialPrice: product.specialPrice,
+    unit: product.unit,
+    image: product.images?.[0] || product.image || null,
+  };
+
+  const handleAdd = () => {
+    setLoading(true);
+    setTimeout(() => {
+      addItem(cartItem, qty);
+      setQty(1);
+      setLoading(false);
+      setAdded(true);
+      toast.success(`${product.name} добавлен в корзину`);
+      setTimeout(() => setAdded(false), 1200);
+    }, 400);
+  };
+
+  const imgSrc = product.images?.[0] || product.image;
+
+  return (
+    <div className="group flex gap-3 rounded-2xl bg-zinc-800 p-2 transition-all duration-300 hover:shadow-xl">
+      {/* Image */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="relative shrink-0 overflow-hidden rounded-xl bg-white"
+      >
+        <div className="flex h-32 w-32 items-center justify-center">
+          {imgSrc ? (
+            <img
+              src={imgSrc}
+              alt={product.name}
+              className="h-full w-full rounded-xl object-contain p-1"
+            />
+          ) : (
+            <Package className="h-10 w-10 text-neutral-300" />
+          )}
+        </div>
+        {/* Badges */}
+        {hasDiscount && (
+          <span className="absolute left-0 top-1.5 rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white">
+            -{Math.round(((product.price - product.specialPrice!) / product.price) * 100)}%
+          </span>
+        )}
+      </Link>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col min-w-0 py-1">
+        {/* Heart */}
+        <button
+          type="button"
+          onClick={() => toggle(cartItem)}
+          className={cn(
+            "absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full transition-all",
+            isFavorite
+              ? "bg-red-500 text-white"
+              : "bg-white/10 text-neutral-400 hover:text-red-500",
+          )}
+        >
+          <Heart className={cn("h-3.5 w-3.5", isFavorite && "fill-white")} />
+        </button>
+
+        <Link
+          href={`/product/${product.slug}`}
+          className="text-sm font-bold text-white hover:text-primary transition-colors line-clamp-2 leading-snug pr-8"
+        >
+          {product.name}
+        </Link>
+
+        <span className="text-[10px] text-neutral-400 mt-0.5">
+          Арт: {product.code}
+        </span>
+
+        {/* Price */}
+        <div className="flex items-baseline gap-1.5 mt-auto">
+          <span className="text-lg font-black text-white">
+            {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")}
+          </span>
+          <span className="text-[10px] text-neutral-400">&#8381;/{product.unit}</span>
+          {hasDiscount && (
+            <span className="text-[10px] text-neutral-500 line-through">
+              {product.price.toLocaleString("ru-RU")}
+            </span>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1.5 mt-2">
+          <QuantitySelector
+            size="sm"
+            value={qty}
+            onChange={setQty}
+            step={product.unit === "м²" ? 0.5 : 1}
+            min={product.unit === "м²" ? 0.5 : 1}
+            unit={product.unit}
+            className="h-8 w-auto rounded-lg bg-white/10 border-0 text-white"
+          />
+          <button
+            onClick={handleAdd}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-lg h-8 text-xs font-bold transition-all",
+              added
+                ? "bg-emerald-500 text-white"
+                : "bg-primary text-white hover:bg-primary/90",
+            )}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : added ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <>
+                <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                В корзину
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -109,28 +250,33 @@ function TableRowItem({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
+  const toggle = useFavoritesStore((s) => s.toggle);
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(product.id));
 
   const hasDiscount =
     product.specialPrice &&
     product.specialPrice > 0 &&
     product.specialPrice < product.price;
 
+  const discountPercent = hasDiscount
+    ? Math.round(((product.price - product.specialPrice!) / product.price) * 100)
+    : 0;
+
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    code: product.code,
+    price: product.price,
+    specialPrice: product.specialPrice,
+    unit: product.unit,
+    image: product.images?.[0] || product.image || null,
+  };
+
   const handleAdd = () => {
     setLoading(true);
     setTimeout(() => {
-      addItem(
-        {
-          id: product.id,
-          name: product.name,
-          slug: product.slug,
-          code: product.code,
-          price: product.price,
-          specialPrice: product.specialPrice,
-          unit: product.unit,
-          image: product.images?.[0] || product.image,
-        },
-        qty
-      );
+      addItem(cartItem, qty);
       setQty(1);
       setLoading(false);
       setAdded(true);
@@ -139,93 +285,155 @@ function TableRowItem({ product }: { product: Product }) {
     }, 400);
   };
 
+  const imgSrc = product.images?.[0] || product.image;
+
   return (
-    <TableRow>
-      <TableCell>
-        <div className="flex h-10 w-10 items-center justify-center rounded bg-secondary/50">
-          {(product.images?.[0] || product.image) ? (
+    <div className="group relative flex items-center gap-4 rounded-2xl bg-zinc-800 p-2 pr-4 transition-all duration-300 hover:shadow-xl">
+      {/* Image */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="relative shrink-0 overflow-hidden rounded-xl bg-white"
+      >
+        <div className="flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center">
+          {imgSrc ? (
             <img
-              src={product.images?.[0] || product.image!}
+              src={imgSrc}
               alt={product.name}
-              className="h-10 w-10 rounded object-contain"
+              className="h-full w-full rounded-xl object-contain p-1"
             />
           ) : (
-            <Package className="h-5 w-5 text-muted-foreground/30" />
+            <Package className="h-8 w-8 text-neutral-300" />
           )}
         </div>
-      </TableCell>
-      <TableCell className="text-xs text-muted-foreground">
-        {product.code}
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/product/${product.slug}`}
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            {product.name}
-          </Link>
-          {product.isHit && (
-            <Badge variant="secondary" className="bg-accent/10 text-accent text-[10px] px-1.5">
-              Хит
-            </Badge>
-          )}
-          {product.isNew && (
-            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 text-[10px] px-1.5">
-              Новинка
-            </Badge>
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="text-right">
-        {hasDiscount ? (
-          <div>
-            <span className="font-bold text-accent">
-              {product.specialPrice!.toLocaleString("ru-RU")} &#8381;
-            </span>
-            <br />
-            <span className="text-xs text-muted-foreground line-through">
-              {product.price.toLocaleString("ru-RU")} &#8381;
-            </span>
+        {/* Badges */}
+        {(hasDiscount || product.isHit || product.isNew) && (
+          <div className="absolute left-0 top-1.5 flex flex-col gap-0.5">
+            {hasDiscount && (
+              <span className="rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white">
+                -{discountPercent}%
+              </span>
+            )}
+            {product.isHit && (
+              <span className="rounded-r-md bg-primary px-1.5 py-0.5 text-[9px] font-black uppercase text-white">
+                Хит
+              </span>
+            )}
+            {product.isNew && (
+              <span className="rounded-r-md bg-emerald-500 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">
+                New
+              </span>
+            )}
           </div>
-        ) : (
-          <span className="font-bold">
+        )}
+      </Link>
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col gap-1 min-w-0">
+        {/* Name + code */}
+        <Link
+          href={`/product/${product.slug}`}
+          className="text-sm font-bold text-white hover:text-primary transition-colors line-clamp-2 leading-snug"
+        >
+          {product.name}
+        </Link>
+        <span className="text-[10px] text-neutral-400">
+          Арт: {product.code}
+        </span>
+
+        {/* Attributes */}
+        {product.attributes && product.attributes.length > 0 && (
+          <div className="hidden sm:flex flex-wrap gap-1 mt-0.5">
+            {product.attributes.slice(0, 3).map((a, i) => (
+              <span
+                key={i}
+                className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] text-neutral-400"
+              >
+                {a.name}: <span className="text-neutral-200">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Price — mobile */}
+        <div className="flex items-baseline gap-2 sm:hidden mt-1">
+          <span className="text-base font-black text-white">
+            {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")} &#8381;
+          </span>
+          <span className="text-[10px] text-neutral-400">/{product.unit}</span>
+          {hasDiscount && (
+            <span className="text-[10px] text-neutral-500 line-through">
+              {product.price.toLocaleString("ru-RU")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Price — desktop */}
+      <div className="hidden sm:flex flex-col items-end shrink-0 mr-2">
+        {hasDiscount && (
+          <span className="text-[11px] text-neutral-500 line-through">
             {product.price.toLocaleString("ru-RU")} &#8381;
           </span>
         )}
-      </TableCell>
-      <TableCell className="text-center text-xs text-muted-foreground">
-        {product.unit}
-      </TableCell>
-      <TableCell>
-        <QuantitySelector size="sm" value={qty} onChange={setQty} className="h-9 rounded-md" />
-      </TableCell>
-      <TableCell>
-        <Button
-          size="sm"
+        <div className="flex items-baseline gap-1">
+          <span className="text-lg font-black text-white">
+            {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")}
+          </span>
+          <span className="text-[10px] text-neutral-400">&#8381;/{product.unit}</span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        {/* Favorite */}
+        <button
+          type="button"
+          onClick={() => toggle(cartItem)}
           className={cn(
-            "h-8 w-[110px] gap-1.5 transition-colors",
-            added
-              ? "bg-emerald-500 hover:bg-emerald-500 text-white"
-              : "bg-accent hover:bg-accent/90 text-accent-foreground"
+            "hidden sm:flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+            isFavorite
+              ? "bg-red-500 text-white"
+              : "bg-white/10 text-neutral-400 hover:text-red-500",
           )}
+        >
+          <Heart className={cn("h-4 w-4", isFavorite && "fill-white")} />
+        </button>
+
+        {/* Quantity */}
+        <div className="hidden sm:block">
+          <QuantitySelector
+            size="sm"
+            value={qty}
+            onChange={setQty}
+            step={product.unit === "м²" ? 0.5 : 1}
+            min={product.unit === "м²" ? 0.5 : 1}
+            unit={product.unit}
+            className="h-9 w-auto rounded-lg bg-white/10 border-0 text-white"
+          />
+        </div>
+
+        {/* Add to cart */}
+        <button
           onClick={handleAdd}
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-lg h-9 px-4 text-xs font-bold transition-all",
+            added
+              ? "bg-emerald-500 text-white"
+              : "bg-primary text-white hover:bg-primary/90",
+          )}
         >
           {loading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : added ? (
-            <>
-              <Check className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Добавлено</span>
-            </>
+            <Check className="h-4 w-4" />
           ) : (
             <>
-              <ShoppingCart className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">В корзину</span>
+              <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden lg:inline">В корзину</span>
             </>
           )}
-        </Button>
-      </TableCell>
-    </TableRow>
+        </button>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Package, ZoomIn, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -95,9 +96,9 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
         )}
       </div>
 
-      {/* Lightbox */}
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90" onClick={() => setLightboxOpen(false)}>
+      {/* Lightbox — rendered via portal to avoid z-index conflicts with sticky header */}
+      {lightboxOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" onClick={() => setLightboxOpen(false)}>
           <button
             onClick={() => setLightboxOpen(false)}
             className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
@@ -144,7 +145,8 @@ export function ProductGallery({ images, name }: ProductGalleryProps) {
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -10,141 +10,226 @@ import { contactInfo } from "@/lib/mock-data";
 
 export const metadata: Metadata = {
   title: "Доставка — МеталлЛидер",
-  description: "Условия доставки металлопроката по Москве и Московской области.",
+  description: "Условия доставки металлопроката по Москве и Московской области. Собственный автопарк, точные сроки.",
 };
 
 const deliveryZones = [
-  { zone: "Москва (в пределах МКАД)", price: "от 5 000 ₽", time: "1-2 дня" },
-  { zone: "Москва (за МКАД до 30 км)", price: "от 7 000 ₽", time: "1-2 дня" },
-  { zone: "Московская область (30-80 км)", price: "от 10 000 ₽", time: "2-3 дня" },
-  { zone: "Московская область (80+ км)", price: "Индивидуально", time: "2-5 дней" },
+  { zone: "Москва (в пределах МКАД)", price: "от 5 000 ₽", time: "1-2 дня", gradient: "from-primary to-orange-600" },
+  { zone: "Москва (за МКАД до 30 км)", price: "от 7 000 ₽", time: "1-2 дня", gradient: "from-blue-500 to-indigo-600" },
+  { zone: "Московская область (30-80 км)", price: "от 10 000 ₽", time: "2-3 дня", gradient: "from-violet-500 to-purple-600" },
+  { zone: "Московская область (80+ км)", price: "Индивидуально", time: "2-5 дней", gradient: "from-emerald-500 to-teal-600" },
 ];
 
 const advantages = [
-  { icon: Truck, title: "Собственный автопарк", desc: "Машины от 1.5 до 20 тонн для любого объёма" },
-  { icon: Clock, title: "Точно в срок", desc: "Доставляем в согласованный день и временной интервал" },
-  { icon: Package, title: "Бережная погрузка", desc: "Аккуратная погрузка и выгрузка краном-манипулятором" },
-  { icon: MapPin, title: "По всей МО", desc: "Доставляем по Москве и Московской области" },
+  { icon: Truck, title: "Собственный автопарк", desc: "Машины от 1.5 до 20 тонн для любого объёма", gradient: "from-primary to-orange-600" },
+  { icon: Clock, title: "Точно в срок", desc: "Доставляем в согласованный день и временной интервал", gradient: "from-blue-500 to-indigo-600" },
+  { icon: Package, title: "Бережная погрузка", desc: "Аккуратная погрузка и выгрузка краном-манипулятором", gradient: "from-violet-500 to-purple-600" },
+  { icon: MapPin, title: "По всей МО", desc: "Доставляем по Москве и Московской области", gradient: "from-emerald-500 to-teal-600" },
+];
+
+const importantInfo = [
+  "Минимальная сумма заказа для доставки — 10 000 ₽",
+  "Разгрузка входит в стоимость при наличии подъезда для транспорта",
+  "При заказе от 50 000 ₽ — доставка по Москве бесплатно",
+  "Возможна срочная доставка в день заказа (при наличии на складе)",
 ];
 
 export default function DeliveryPage() {
   return (
-    <Container className="py-6 lg:py-10">
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link href="/">Главная</Link></BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Доставка</BreadcrumbPage></BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <>
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden bg-zinc-800">
+        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+          ДОСТАВКА
+        </span>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
 
-      <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Доставка</h1>
-      <p className="mt-2 mb-10 text-muted-foreground max-w-2xl">
-        Доставляем металлопрокат по Москве и Московской области. Собственный автопарк, точные сроки, бережная погрузка.
-      </p>
+        <Container className="relative py-10 lg:py-16">
+          <Breadcrumb className="mb-8">
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-white">Главная</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator className="text-neutral-600" />
+              <BreadcrumbItem><BreadcrumbPage className="text-white">Доставка</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-      {/* Advantages */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-        {advantages.map((a) => (
-          <div key={a.title} className="flex gap-4 rounded-2xl border bg-white p-5 transition-shadow hover:shadow-md">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <a.icon className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-neutral-900">{a.title}</h3>
-              <p className="mt-0.5 text-xs text-neutral-500">{a.desc}</p>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="block h-7 w-1 rounded-full bg-primary" />
+            <span className="text-sm font-bold uppercase tracking-widest text-primary">Логистика</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+            Доставка
+          </h1>
+          <p className="mt-3 text-neutral-400 max-w-xl">
+            Доставляем металлопрокат по Москве и Московской области. Собственный автопарк, точные сроки, бережная погрузка.
+          </p>
+        </Container>
+      </section>
+
+      {/* ── Advantages ── */}
+      <section className="py-12 lg:py-16">
+        <Container>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {advantages.map((a, idx) => (
+              <div key={a.title} className="group relative overflow-hidden rounded-2xl bg-zinc-800 p-6 transition-all duration-300 hover:shadow-2xl">
+                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+                <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full bg-linear-to-br ${a.gradient} opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20`} />
+                <div className="relative z-10">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br ${a.gradient} shadow-lg`}>
+                    <a.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-white">{a.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-400">{a.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Delivery zones ── */}
+      <section className="bg-neutral-50 py-12 lg:py-16">
+        <Container>
+          <div className="relative mb-10 overflow-hidden">
+            <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-200/60 font-(family-name:--font-unbounded)">
+              ЗОНЫ
+            </span>
+            <div className="relative">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="block h-7 w-1 rounded-full bg-orange-500" />
+                <span className="text-sm font-bold uppercase tracking-widest text-orange-500">Тарифы</span>
+              </div>
+              <h2 className="text-3xl font-extrabold text-neutral-900 md:text-4xl font-(family-name:--font-unbounded)">
+                Стоимость доставки
+              </h2>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Delivery zones table */}
-      <div className="mb-12">
-        <h2 className="text-xl font-bold mb-4">Стоимость доставки</h2>
-        <div className="overflow-hidden rounded-2xl border bg-white">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-neutral-50">
-                <th className="px-5 py-3 text-left font-semibold text-neutral-900">Зона доставки</th>
-                <th className="px-5 py-3 text-left font-semibold text-neutral-900">Стоимость</th>
-                <th className="px-5 py-3 text-left font-semibold text-neutral-900">Сроки</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deliveryZones.map((z, i) => (
-                <tr key={i} className="border-b last:border-0 hover:bg-neutral-50/50 transition-colors">
-                  <td className="px-5 py-3.5 text-neutral-700">{z.zone}</td>
-                  <td className="px-5 py-3.5 font-semibold text-neutral-900">{z.price}</td>
-                  <td className="px-5 py-3.5 text-neutral-500">{z.time}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-3 text-xs text-neutral-400">
-          * Точная стоимость зависит от веса, объёма и адреса доставки. Уточняйте у менеджера.
-        </p>
-      </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {deliveryZones.map((z, i) => (
+              <div key={i} className="group relative overflow-hidden rounded-2xl bg-white p-6 ring-1 ring-neutral-100 transition-all hover:shadow-lg hover:ring-primary/20">
+                <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full bg-linear-to-br ${z.gradient} opacity-5 blur-xl group-hover:opacity-10 transition-opacity`} />
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-900">{z.zone}</p>
+                      <p className="mt-1 text-xs text-neutral-500">Срок: {z.time}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-xl bg-linear-to-br ${z.gradient} px-4 py-2 text-base font-extrabold text-white shadow-lg`}>
+                      {z.price}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-neutral-400">
+            * Точная стоимость зависит от веса, объёма и адреса доставки. Уточняйте у менеджера.
+          </p>
+        </Container>
+      </section>
 
-      {/* Pickup */}
-      <div className="mb-12">
-        <h2 className="text-xl font-bold mb-4">Самовывоз</h2>
-        <div className="rounded-2xl border bg-gradient-to-r from-emerald-50 to-teal-50 p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-neutral-900">Бесплатный самовывоз</h3>
-              <p className="mt-1 text-sm text-neutral-600">
-                Забирайте заказ бесплатно с нашего склада. Помощь при погрузке включена.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                <span className="flex items-center gap-1.5 text-neutral-700">
-                  <MapPin className="h-4 w-4 text-emerald-600" />
-                  {contactInfo.address}, {contactInfo.warehouse}
-                </span>
-                <span className="flex items-center gap-1.5 text-neutral-700">
-                  <Clock className="h-4 w-4 text-emerald-600" />
-                  {contactInfo.workingHours}
-                </span>
+      {/* ── Pickup ── */}
+      <section className="py-12 lg:py-16">
+        <Container>
+          <div className="relative overflow-hidden rounded-2xl bg-zinc-800 p-8 lg:p-10">
+            <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[8rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+              FREE
+            </span>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.1),transparent_50%)]" />
+
+            <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 shadow-lg">
+                <CheckCircle2 className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold text-white font-(family-name:--font-unbounded)">
+                  Бесплатный самовывоз
+                </h2>
+                <p className="mt-2 text-sm text-neutral-400 leading-relaxed max-w-lg">
+                  Забирайте заказ бесплатно с нашего склада. Помощь при погрузке включена.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-4">
+                  <span className="flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-neutral-300">
+                    <MapPin className="h-4 w-4 text-emerald-400" />
+                    {contactInfo.address}
+                  </span>
+                  <span className="flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-neutral-300">
+                    <Clock className="h-4 w-4 text-emerald-400" />
+                    {contactInfo.workingHours}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </Container>
+      </section>
 
-      {/* Important info */}
-      <div className="mb-12">
-        <h2 className="text-xl font-bold mb-4">Важно знать</h2>
-        <div className="space-y-3">
-          {[
-            "Минимальная сумма заказа для доставки — 10 000 ₽",
-            "Разгрузка входит в стоимость при наличии подъезда для транспорта",
-            "При заказе от 50 000 ₽ — доставка по Москве бесплатно",
-            "Возможна срочная доставка в день заказа (при наличии на складе)",
-          ].map((text, i) => (
-            <div key={i} className="flex items-start gap-3 rounded-xl bg-amber-50/50 border border-amber-200/40 px-4 py-3">
-              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
-              <span className="text-sm text-neutral-700">{text}</span>
+      {/* ── Important info ── */}
+      <section className="bg-neutral-50 py-12 lg:py-16">
+        <Container>
+          <div className="relative mb-10 overflow-hidden">
+            <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-200/60 font-(family-name:--font-unbounded)">
+              ВАЖНО
+            </span>
+            <div className="relative">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="block h-7 w-1 rounded-full bg-amber-500" />
+                <span className="text-sm font-bold uppercase tracking-widest text-amber-500">Информация</span>
+              </div>
+              <h2 className="text-3xl font-extrabold text-neutral-900 md:text-4xl font-(family-name:--font-unbounded)">
+                Важно знать
+              </h2>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* CTA */}
-      <div className="rounded-2xl bg-neutral-900 p-8 text-center text-white">
-        <h2 className="text-xl font-bold">Нужна доставка?</h2>
-        <p className="mt-2 text-sm text-white/70">Позвоните нам — рассчитаем стоимость за 5 минут</p>
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <Button asChild size="lg">
-            <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
-              <Phone className="h-4 w-4" />
-              {contactInfo.phone}
-            </a>
-          </Button>
-        </div>
-      </div>
-    </Container>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {importantInfo.map((text, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-2xl bg-white p-5 ring-1 ring-neutral-100">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                </div>
+                <span className="text-sm text-neutral-700 leading-relaxed">{text}</span>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="relative overflow-hidden bg-zinc-800 py-16 lg:py-20">
+        <span className="pointer-events-none absolute top-4 right-0 select-none text-[clamp(4rem,10vw,10rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+          ЗВОНИТЕ
+        </span>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
+
+        <Container className="relative">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+              <Truck className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
+              Нужна доставка?
+            </h2>
+            <p className="mt-3 text-neutral-400 max-w-md">
+              Позвоните нам — рассчитаем стоимость за 5 минут и подберём оптимальный вариант
+            </p>
+            <div className="mt-8 flex items-center gap-4 flex-wrap justify-center">
+              <Button asChild size="lg" className="h-13 px-8 text-base font-bold bg-primary text-white hover:bg-primary/90 rounded-xl">
+                <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
+                  <Phone className="h-5 w-5" />
+                  {contactInfo.phone}
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base font-bold border-white/20 bg-transparent text-white hover:bg-white/10 rounded-xl">
+                <Link href="/contacts">Контакты</Link>
+              </Button>
+            </div>
+          </div>
+        </Container>
+      </section>
+    </>
   );
 }

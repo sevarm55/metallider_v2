@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Send, Navigation, MessageCircle } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, Navigation, MessageCircle, Building2 } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import { contactInfo } from "@/lib/mock-data";
 
 export const metadata: Metadata = {
   title: "Контакты — МеталлЛидер",
-  description: "Контакты МеталлЛидер: адрес склада, телефон, email, график работы.",
+  description: "Контакты МеталлЛидер: адрес склада, телефон, email, график работы. Приезжайте на склад в Реутов.",
 };
 
 const contactCards = [
@@ -20,7 +20,7 @@ const contactCards = [
     value: contactInfo.phone,
     href: `tel:${contactInfo.phoneRaw}`,
     desc: "Звоните в рабочее время",
-    color: "bg-primary/10 text-primary",
+    gradient: "from-primary to-orange-600",
   },
   {
     icon: Mail,
@@ -28,15 +28,15 @@ const contactCards = [
     value: contactInfo.email,
     href: `mailto:${contactInfo.email}`,
     desc: "Ответим в течение часа",
-    color: "bg-blue-100 text-blue-600",
+    gradient: "from-blue-500 to-indigo-600",
   },
   {
     icon: MapPin,
     title: "Адрес",
-    value: `${contactInfo.address}, ${contactInfo.warehouse}`,
+    value: contactInfo.address,
     href: contactInfo.mapUrl,
-    desc: "Показать на карте",
-    color: "bg-emerald-100 text-emerald-600",
+    desc: contactInfo.warehouse,
+    gradient: "from-emerald-500 to-teal-600",
   },
   {
     icon: Clock,
@@ -44,136 +44,218 @@ const contactCards = [
     value: contactInfo.workingHours,
     href: null,
     desc: "Воскресенье — выходной",
-    color: "bg-amber-100 text-amber-600",
+    gradient: "from-violet-500 to-purple-600",
   },
+];
+
+const requisites = [
+  { label: "Название", value: "ООО «МеталлЛидер»" },
+  { label: "ИНН", value: "7712345678" },
+  { label: "КПП", value: "771201001" },
+  { label: "ОГРН", value: "1177746123456" },
+  { label: "Юридический адрес", value: "г. Москва, ул. Примерная, д. 1" },
+  { label: "Расчётный счёт", value: "40702810123450001234" },
 ];
 
 export default function ContactsPage() {
   return (
-    <Container className="py-6 lg:py-10">
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link href="/">Главная</Link></BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Контакты</BreadcrumbPage></BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <>
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden bg-zinc-800">
+        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+          КОНТАКТЫ
+        </span>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
 
-      <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Контакты</h1>
-      <p className="mt-2 mb-10 text-muted-foreground max-w-2xl">
-        Свяжитесь с нами удобным способом — по телефону, email или приезжайте на склад
-      </p>
+        <Container className="relative py-10 lg:py-16">
+          <Breadcrumb className="mb-8">
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-white">Главная</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator className="text-neutral-600" />
+              <BreadcrumbItem><BreadcrumbPage className="text-white">Контакты</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-      {/* Contact cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-        {contactCards.map((c) => {
-          const Wrapper = c.href ? "a" : "div";
-          const wrapperProps = c.href ? { href: c.href, target: c.href.startsWith("http") ? "_blank" : undefined } : {};
-          return (
-            <Wrapper
-              key={c.title}
-              {...(wrapperProps as any)}
-              className="group rounded-2xl border bg-white p-5 transition-all hover:shadow-md hover:border-primary/20"
-            >
-              <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${c.color}`}>
-                <c.icon className="h-5 w-5" />
-              </div>
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">{c.title}</p>
-              <p className="mt-1 text-sm font-bold text-neutral-900">{c.value}</p>
-              <p className="mt-1 text-xs text-neutral-500">{c.desc}</p>
-            </Wrapper>
-          );
-        })}
-      </div>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="block h-7 w-1 rounded-full bg-primary" />
+            <span className="text-sm font-bold uppercase tracking-widest text-primary">Связь</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+            Контакты
+          </h1>
+          <p className="mt-3 text-neutral-400 max-w-xl">
+            Свяжитесь с нами удобным способом — по телефону, email или приезжайте на склад
+          </p>
+        </Container>
+      </section>
 
-      {/* Map + details */}
-      <div className="grid gap-6 lg:grid-cols-5 mb-12">
-        {/* Map placeholder */}
-        <div className="lg:col-span-3 overflow-hidden rounded-2xl border bg-neutral-100 min-h-[400px]">
+      {/* ── Contact cards ── */}
+      <section className="py-12 lg:py-16">
+        <Container>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {contactCards.map((c, idx) => {
+              const Wrapper = c.href ? "a" : "div";
+              const wrapperProps = c.href ? { href: c.href, target: c.href.startsWith("http") ? "_blank" : undefined } : {};
+              return (
+                <Wrapper
+                  key={c.title}
+                  {...(wrapperProps as any)}
+                  className="group relative overflow-hidden rounded-2xl bg-zinc-800 p-6 transition-all duration-300 hover:shadow-2xl"
+                >
+                  <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full bg-linear-to-br ${c.gradient} opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20`} />
+                  <div className="relative z-10">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br ${c.gradient} shadow-lg`}>
+                      <c.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <p className="mt-4 text-xs font-medium text-neutral-500 uppercase tracking-wide">{c.title}</p>
+                    <p className="mt-1 text-base font-bold text-white">{c.value}</p>
+                    <p className="mt-1 text-xs text-neutral-500">{c.desc}</p>
+                  </div>
+                </Wrapper>
+              );
+            })}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Immersive map with side panel ── */}
+      <section className="relative overflow-hidden bg-zinc-900">
+        <div className="relative min-h-[550px] lg:min-h-[650px]">
+          {/* Map fills entire background */}
           <iframe
             src="https://yandex.ru/map-widget/v1/?text=Металлидер+Реутов+Автомагистраль+Москва+Нижний+Новгород+1&z=15&l=map"
             width="100%"
             height="100%"
-            style={{ border: 0, display: "block", minHeight: 400 }}
+            style={{ border: 0, display: "block" }}
             allowFullScreen
             loading="lazy"
+            className="absolute inset-0 h-full w-full"
           />
-        </div>
 
-        {/* Details */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-2xl border bg-white p-6">
-            <h3 className="text-base font-bold text-neutral-900 mb-4">Как добраться</h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <Navigation className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-neutral-900">На автомобиле</p>
-                  <p className="text-xs text-neutral-500">Удобный подъезд, бесплатная парковка для клиентов</p>
+          {/* Gradient overlays for depth */}
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-zinc-900/95 via-zinc-900/50 to-transparent lg:via-zinc-900/30" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-zinc-900/60 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-zinc-900/60 to-transparent" />
+
+          {/* Floating side panel */}
+          <div className="pointer-events-none relative z-10 flex h-full min-h-[550px] lg:min-h-[650px] items-center">
+            <Container>
+              <div className="max-w-sm lg:max-w-md">
+                <div className="pointer-events-auto rounded-3xl bg-zinc-800/80 backdrop-blur-2xl p-7 lg:p-9 ring-1 ring-white/10 shadow-2xl shadow-black/40">
+                  {/* Decorative glow */}
+                  <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+
+                  {/* Pin icon with pulse */}
+                  <div className="relative mb-6 inline-flex">
+                    <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-ping" style={{ animationDuration: "2s" }} />
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-orange-600 shadow-lg shadow-primary/30">
+                      <MapPin className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+
+                  <h2 className="text-2xl font-extrabold text-white lg:text-3xl font-(family-name:--font-unbounded)">
+                    Приезжайте к нам
+                  </h2>
+                  <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
+                    {contactInfo.warehouse} — удобный подъезд и бесплатная парковка
+                  </p>
+
+                  {/* Info rows */}
+                  <div className="mt-6 space-y-3">
+                    <a href={contactInfo.mapUrl} target="_blank" className="flex items-center gap-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/5 hover:ring-primary/20 transition-all group">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                        <MapPin className="h-4 w-4 text-emerald-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Адрес</p>
+                        <p className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">{contactInfo.address}</p>
+                      </div>
+                    </a>
+
+                    <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                        <Clock className="h-4 w-4 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Режим работы</p>
+                        <p className="text-sm font-semibold text-white">{contactInfo.workingHours}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                        <Navigation className="h-4 w-4 text-violet-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">На автомобиле</p>
+                        <p className="text-sm font-semibold text-white">Бесплатная парковка</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Messengers */}
+                  <div className="mt-5 flex gap-2">
+                    <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                      <Send className="h-3.5 w-3.5" />
+                      Telegram
+                    </a>
+                    <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      WhatsApp
+                    </a>
+                  </div>
+
+                  {/* CTA */}
+                  <Button asChild size="lg" className="mt-5 w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-base">
+                    <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
+                      <Phone className="h-5 w-5" />
+                      {contactInfo.phone}
+                    </a>
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-neutral-900">Ориентир</p>
-                  <p className="text-xs text-neutral-500">{contactInfo.warehouse}, территория металлобазы</p>
+            </Container>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Requisites ── */}
+      <section className="py-12 lg:py-16">
+        <Container>
+          <div className="relative overflow-hidden rounded-2xl bg-zinc-800 p-8 lg:p-10">
+            <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[8rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+              ИНН
+            </span>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(var(--color-primary),0.06),transparent_50%)]" />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-orange-600 shadow-lg">
+                  <Building2 className="h-7 w-7 text-white" />
                 </div>
+                <div>
+                  <h2 className="text-2xl font-extrabold text-white font-(family-name:--font-unbounded)">
+                    Реквизиты
+                  </h2>
+                  <p className="text-sm text-neutral-400">Юридическая информация о компании</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {requisites.map((r) => (
+                  <div key={r.label} className="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <p className="text-xs text-neutral-500 uppercase tracking-wide mb-1">{r.label}</p>
+                    <p className="text-sm font-semibold text-white">{r.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-
-          <div className="rounded-2xl border bg-white p-6">
-            <h3 className="text-base font-bold text-neutral-900 mb-4">Мессенджеры</h3>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href="#"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-100 transition-colors"
-              >
-                <Send className="h-4 w-4" />
-                Telegram
-              </a>
-              <a
-                href="#"
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-600 hover:bg-emerald-100 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                WhatsApp
-              </a>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-primary p-6 text-white">
-            <h3 className="text-base font-bold">Получить консультацию</h3>
-            <p className="mt-1 text-xs text-white/70">Поможем подобрать металлопрокат для вашего проекта</p>
-            <Button asChild size="sm" variant="secondary" className="mt-4 w-full">
-              <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
-                <Phone className="h-4 w-4" />
-                Позвонить
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Requisites */}
-      <div className="rounded-2xl border bg-white p-6 lg:p-8">
-        <h2 className="text-xl font-bold mb-4">Реквизиты</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
-          {[
-            { label: "Название", value: "ООО «МеталлЛидер»" },
-            { label: "ИНН", value: "7712345678" },
-            { label: "КПП", value: "771201001" },
-            { label: "ОГРН", value: "1177746123456" },
-            { label: "Юридический адрес", value: "г. Москва, ул. Примерная, д. 1" },
-            { label: "Расчётный счёт", value: "40702810123450001234" },
-          ].map((r) => (
-            <div key={r.label}>
-              <p className="text-xs text-neutral-400 mb-0.5">{r.label}</p>
-              <p className="font-medium text-neutral-900">{r.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Container>
+        </Container>
+      </section>
+    </>
   );
 }

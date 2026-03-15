@@ -36,7 +36,13 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
 
   return (
     <div className="mt-6 flex items-center gap-3">
-      <QuantitySelector value={qty} onChange={setQty} />
+      <QuantitySelector
+        value={qty}
+        onChange={setQty}
+        step={product.unit === "м²" ? 0.5 : 1}
+        min={product.unit === "м²" ? 0.5 : 1}
+        unit={product.unit}
+      />
       <Button
         size="lg"
         className={cn(

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Search, Trash2, Pencil, FolderTree } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, FolderTree, Upload, Sparkles, X, ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import { axiosInstance } from "@/lib/services/instance";
 import type { ApiErrorResponse } from "@/lib/types/api-response";
 import { AxiosError } from "axios";
 import { slugify } from "@/lib/slugify";
+import Image from "next/image";
 
 interface Category {
   id: string;
@@ -35,7 +36,7 @@ interface Category {
   _count: { products: number };
 }
 
-const emptyForm = { name: "", slug: "", sortOrder: 0, isActive: true };
+const emptyForm = { name: "", slug: "", sortOrder: 0, isActive: true, image: "" as string | null, parentId: "" as string | null };
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -45,6 +46,8 @@ export default function CategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -67,8 +70,50 @@ export default function CategoriesPage() {
 
   function openEdit(cat: Category) {
     setEditingId(cat.id);
-    setForm({ name: cat.name, slug: cat.slug, sortOrder: cat.sortOrder, isActive: cat.isActive });
+    setForm({ name: cat.name, slug: cat.slug, sortOrder: cat.sortOrder, isActive: cat.isActive, image: cat.image, parentId: cat.parentId });
     setDialogOpen(true);
+  }
+
+  async function handleUploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await axiosInstance.post("/admin/upload", fd);
+      if (res.data.success) {
+        setForm((f) => ({ ...f, image: res.data.data.url }));
+        toast.success("Изображение загружено");
+      }
+    } catch {
+      toast.error("Ошибка загрузки");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleGenerateImage() {
+    if (!form.name.trim()) {
+      toast.error("Сначала введите название категории");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const res = await axiosInstance.post("/admin/images/process", {
+        action: "generate-category",
+        categoryName: form.name,
+      });
+      if (res.data.success) {
+        setForm((f) => ({ ...f, image: res.data.data.url }));
+        toast.success("Изображение сгенерировано");
+      }
+    } catch {
+      toast.error("Ошибка генерации");
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function handleSave() {
@@ -81,6 +126,8 @@ export default function CategoriesPage() {
       const payload = {
         ...form,
         slug: form.slug || slugify(form.name),
+        image: form.image || null,
+        parentId: form.parentId || null,
       };
 
       if (editingId) {
@@ -117,9 +164,26 @@ export default function CategoriesPage() {
     }
   }
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Group: parent categories first, then their children
+  const filtered = (() => {
+    const matched = categories.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()),
+    );
+    if (search) return matched;
+    const parents = matched.filter((c) => !c.parentId);
+    const result: Category[] = [];
+    for (const parent of parents) {
+      result.push(parent);
+      const children = matched.filter((c) => c.parentId === parent.id);
+      result.push(...children);
+    }
+    // Add orphan children (parent filtered out)
+    const addedIds = new Set(result.map((c) => c.id));
+    for (const cat of matched) {
+      if (!addedIds.has(cat.id)) result.push(cat);
+    }
+    return result;
+  })();
 
   return (
     <div className="space-y-6">
@@ -170,14 +234,29 @@ export default function CategoriesPage() {
               filtered.map((cat) => (
                 <TableRow key={cat.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <FolderTree className="h-4 w-4 text-muted-foreground/50" />
-                      <button
-                        onClick={() => openEdit(cat)}
-                        className="font-medium hover:underline text-left"
-                      >
-                        {cat.name}
-                      </button>
+                    <div className={`flex items-center gap-3 ${cat.parentId ? "pl-6" : ""}`}>
+                      {cat.image ? (
+                        <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded-md bg-neutral-100">
+                          <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-md bg-neutral-100">
+                          <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                        </div>
+                      )}
+                      <div>
+                        <button
+                          onClick={() => openEdit(cat)}
+                          className="font-medium hover:underline text-left"
+                        >
+                          {cat.name}
+                        </button>
+                        {cat.parentId && (
+                          <p className="text-xs text-muted-foreground">
+                            ↳ {categories.find((c) => c.id === cat.parentId)?.name}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{cat.slug}</TableCell>
@@ -260,6 +339,21 @@ export default function CategoriesPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label>Родительская категория</Label>
+              <select
+                value={form.parentId || ""}
+                onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value || null }))}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">— Корневая категория —</option>
+                {categories
+                  .filter((c) => !c.parentId && c.id !== editingId)
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+              </select>
+            </div>
+            <div className="space-y-2">
               <Label>Порядок сортировки</Label>
               <Input
                 type="number"
@@ -267,6 +361,63 @@ export default function CategoriesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))}
               />
             </div>
+            {/* Category image */}
+            <div className="space-y-2">
+              <Label>Изображение</Label>
+              {form.image ? (
+                <div className="relative group">
+                  <div className="relative h-40 w-full overflow-hidden rounded-xl border bg-neutral-50">
+                    <Image src={form.image} alt="Превью" fill className="object-cover" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, image: null }))}
+                    className="absolute top-2 right-2 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex h-32 w-full items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/30">
+                  <div className="text-center text-muted-foreground">
+                    <ImageIcon className="mx-auto h-8 w-8 mb-1 opacity-40" />
+                    <p className="text-xs">Нет изображения</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 flex-1"
+                  disabled={uploading || generating}
+                  onClick={() => document.getElementById("cat-image-input")?.click()}
+                >
+                  {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  {uploading ? "Загрузка..." : "Загрузить"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 flex-1"
+                  disabled={generating || uploading || !form.name.trim()}
+                  onClick={handleGenerateImage}
+                >
+                  {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {generating ? "Генерация..." : "Сгенерировать"}
+                </Button>
+                <input
+                  id="cat-image-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleUploadImage}
+                />
+              </div>
+            </div>
+
             <label className="flex items-center gap-3 cursor-pointer">
               <Checkbox
                 checked={form.isActive}
