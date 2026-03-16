@@ -15,17 +15,17 @@ export default function PrivacyPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-zinc-800">
-        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(4rem,12vw,10rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+      <section className="relative overflow-hidden bg-neutral-50">
+        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(4rem,12vw,10rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           PRIVACY
         </span>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
         <Container className="relative py-10 lg:py-14">
           <Breadcrumb className="mb-8">
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-white">Главная</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-neutral-900">Главная</Link></BreadcrumbLink></BreadcrumbItem>
               <BreadcrumbSeparator className="text-neutral-600" />
-              <BreadcrumbItem><BreadcrumbPage className="text-white">Политика конфиденциальности</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbPage className="text-neutral-900">Политика конфиденциальности</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-4">
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
               <ShieldCheck className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
+              <h1 className="text-2xl font-extrabold text-neutral-900 md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
                 Политика конфиденциальности
               </h1>
               <p className="mt-1 text-sm text-neutral-400">Дата обновления: 10 марта 2026 г.</p>

@@ -67,12 +67,8 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
         {categories.map((parent, idx) => (
           <div
             key={parent.id}
-            className="group relative overflow-hidden rounded-2xl bg-zinc-800 transition-all duration-300 hover:shadow-2xl"
+            className="group relative overflow-hidden rounded-2xl bg-neutral-50 border border-neutral-200 transition-all duration-300 hover:shadow-2xl"
           >
-            {/* Background number */}
-            <span className="pointer-events-none absolute right-6 top-4 z-10 select-none text-[7rem] font-black leading-none text-white/5 font-(family-name:--font-unbounded)">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
 
             <div className="relative z-10 flex flex-col lg:flex-row">
               {/* Image side */}
@@ -88,11 +84,11 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-                    <Package className="h-14 w-14 text-neutral-700" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-neutral-100">
+                    <Package className="h-14 w-14 text-neutral-300" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-linear-to-r from-zinc-800/100 to-transparent lg:bg-linear-to-l" />
+                <div className="absolute inset-y-0 right-0 w-1/3 bg-linear-to-l from-neutral-50 to-transparent lg:left-auto" />
               </Link>
 
               {/* Content */}
@@ -104,17 +100,17 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                       <span className="text-xs font-bold uppercase tracking-widest text-primary">
                         Раздел {String(idx + 1).padStart(2, "0")}
                       </span>
-                      <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-white/50">
+                      <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-500">
                         {parent.totalProducts} товаров
                       </span>
                     </div>
-                    <h2 className="text-2xl font-extrabold text-white font-(family-name:--font-unbounded) group-hover/title:text-primary transition-colors">
+                    <h2 className="text-2xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded) group-hover/title:text-primary transition-colors">
                       {parent.name}
                     </h2>
                   </Link>
                   <Link
                     href={`/catalog/${parent.slug}`}
-                    className="hidden sm:flex items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2 text-xs font-semibold text-white/60 hover:bg-primary hover:text-white transition-all"
+                    className="hidden sm:flex items-center gap-1.5 rounded-xl bg-neutral-100 px-4 py-2 text-xs font-semibold text-neutral-600 hover:bg-primary hover:text-white transition-all"
                   >
                     Все товары <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
@@ -126,14 +122,14 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                     <Link
                       key={sub.id}
                       href={`/catalog/${sub.slug}`}
-                      className="group/sub flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition-all"
+                      className="group/sub flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3 hover:bg-neutral-100 transition-all"
                     >
                       <div className="min-w-0">
-                        <span className="text-sm font-medium text-white/80 group-hover/sub:text-white transition-colors line-clamp-1">
+                        <span className="text-sm font-medium text-neutral-700 group-hover/sub:text-neutral-900 transition-colors line-clamp-1">
                           {sub.name}
                         </span>
                       </div>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/20 group-hover/sub:text-primary group-hover/sub:translate-x-0.5 transition-all" />
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-neutral-300 group-hover/sub:text-primary group-hover/sub:translate-x-0.5 transition-all" />
                     </Link>
                   ))}
                 </div>

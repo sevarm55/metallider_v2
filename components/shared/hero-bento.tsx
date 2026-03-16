@@ -13,7 +13,7 @@ export function HeroBento() {
           {/* Top image */}
           <div className="relative overflow-hidden rounded-2xl">
             <Image
-              src="/images/categories/truby.webp"
+              src="/images/categories/truby2.png"
               alt="Трубы профильные"
               fill
               className="object-cover"
@@ -29,7 +29,7 @@ export function HeroBento() {
           {/* Bottom image */}
           <div className="relative overflow-hidden rounded-2xl">
             <Image
-              src="/images/categories/listy.webp"
+              src="/images/categories/listy2.png"
               alt="Листовой прокат"
               fill
               className="object-cover"

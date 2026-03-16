@@ -106,9 +106,9 @@ export default async function PromotionsPage() {
   return (
     <>
       {/* ── Hero section ── */}
-      <section className="relative overflow-hidden bg-zinc-800">
+      <section className="relative overflow-hidden bg-neutral-50">
         {/* Background decorative */}
-        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           АКЦИИ
         </span>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
@@ -117,9 +117,9 @@ export default async function PromotionsPage() {
         <Container className="relative py-10 lg:py-16">
           <Breadcrumb className="mb-8">
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-white">Главная</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-neutral-900">Главная</Link></BreadcrumbLink></BreadcrumbItem>
               <BreadcrumbSeparator className="text-neutral-600" />
-              <BreadcrumbItem><BreadcrumbPage className="text-white">Акции</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbPage className="text-neutral-900">Акции</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
@@ -131,16 +131,16 @@ export default async function PromotionsPage() {
                   Спецпредложения
                 </span>
               </div>
-              <h1 className="text-3xl font-extrabold text-white md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+              <h1 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
                 Акции и скидки
               </h1>
               <p className="mt-3 text-neutral-400 max-w-xl">
                 Выгодные условия на металлопрокат — следите за сроками, некоторые акции ограничены
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 shrink-0">
+            <div className="flex items-center gap-2 rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-2.5 shrink-0">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-white">{promos.length} активных акций</span>
+              <span className="text-sm font-semibold text-neutral-900">{promos.length} активных акций</span>
             </div>
           </div>
         </Container>
@@ -154,10 +154,10 @@ export default async function PromotionsPage() {
             {promos.slice(0, 1).map((p, idx) => (
               <div
                 key={p.id}
-                className="group relative overflow-hidden rounded-2xl bg-zinc-800 p-8 transition-all duration-300 hover:shadow-2xl md:col-span-2 lg:col-span-2 lg:row-span-2"
+                className="group relative overflow-hidden rounded-2xl bg-white p-8 transition-all duration-300 hover:shadow-2xl md:col-span-2 lg:col-span-2 lg:row-span-2"
               >
                 {/* Background number */}
-                <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[10rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+                <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[10rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
                   01
                 </span>
                 {/* Gradient glow */}
@@ -174,7 +174,7 @@ export default async function PromotionsPage() {
                     </span>
                   </div>
 
-                  <h3 className="mt-6 text-2xl font-extrabold text-white lg:text-3xl font-(family-name:--font-unbounded)">
+                  <h3 className="mt-6 text-2xl font-extrabold text-neutral-900 lg:text-3xl font-(family-name:--font-unbounded)">
                     {p.title}
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-neutral-400 max-w-lg lg:text-base">
@@ -199,10 +199,10 @@ export default async function PromotionsPage() {
             {promos.slice(1).map((p, i) => (
               <div
                 key={p.id}
-                className="group relative overflow-hidden rounded-2xl bg-zinc-800 p-6 transition-all duration-300 hover:shadow-2xl"
+                className="group relative overflow-hidden rounded-2xl bg-white p-6 transition-all duration-300 hover:shadow-2xl"
               >
                 {/* Background number */}
-                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
                   {String(i + 2).padStart(2, "0")}
                 </span>
                 {/* Gradient glow */}
@@ -218,7 +218,7 @@ export default async function PromotionsPage() {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-lg font-bold text-white">
+                  <h3 className="mt-4 text-lg font-bold text-neutral-900">
                     {p.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-400">
@@ -283,8 +283,8 @@ export default async function PromotionsPage() {
       )}
 
       {/* ── CTA section ── */}
-      <section className="relative overflow-hidden bg-zinc-800 py-16 lg:py-20">
-        <span className="pointer-events-none absolute top-4 right-0 select-none text-[clamp(4rem,10vw,10rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+      <section className="relative overflow-hidden bg-neutral-50 py-16 lg:py-20">
+        <span className="pointer-events-none absolute top-4 right-0 select-none text-[clamp(4rem,10vw,10rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           ЗВОНИТЕ
         </span>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
@@ -294,7 +294,7 @@ export default async function PromotionsPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
               <BadgePercent className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-extrabold text-white md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
+            <h2 className="text-2xl font-extrabold text-neutral-900 md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
               Хотите индивидуальную скидку?
             </h2>
             <p className="mt-3 text-neutral-400 max-w-md">
@@ -307,7 +307,7 @@ export default async function PromotionsPage() {
                   {contactInfo.phone}
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base font-bold border-white/20 bg-transparent text-white hover:bg-white/10 rounded-xl">
+              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base font-bold border-neutral-200 bg-transparent text-neutral-900 hover:bg-neutral-100 rounded-xl">
                 <Link href="/catalog">Перейти в каталог</Link>
               </Button>
             </div>
