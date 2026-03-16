@@ -88,7 +88,7 @@ export function HeaderClassic() {
       </div>
 
       {/* ━━━ Main header — light ━━━ */}
-      <div className="relative overflow-hidden bg-white border-b border-neutral-100">
+      <div className="sticky top-0 z-50 relative overflow-hidden bg-white/95 backdrop-blur-md border-b border-neutral-100 lg:relative lg:z-auto lg:bg-white lg:backdrop-blur-none">
         {/* Giant watermark */}
         <span className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2 select-none text-[clamp(5rem,14vw,11rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded) hidden lg:block">
           METAL
