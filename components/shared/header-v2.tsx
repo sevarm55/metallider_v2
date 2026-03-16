@@ -87,7 +87,7 @@ export function Header() {
               {/* AI Chat */}
               <button
                 onClick={() => window.dispatchEvent(new Event("open-ai-chat"))}
-                className="hidden lg:flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-primary transition-all cursor-pointer"
+                className="hidden lg:flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-primary/80 transition-all cursor-pointer"
               >
                 <Bot className="h-3.5 w-3.5" />
                 AI
@@ -154,17 +154,17 @@ export function Header() {
                     <Menu className="h-5 w-5" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[320px] bg-neutral-950 border-r border-white/5 p-0 overflow-y-auto">
+                <SheetContent side="left" className="w-[320px] bg-white border-r border-neutral-200 p-0 overflow-y-auto">
                   {/* Mobile header */}
                   <div className="relative overflow-hidden px-6 pt-8 pb-6">
-                    <span className="pointer-events-none absolute -right-2 -top-2 select-none text-[5rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+                    <span className="pointer-events-none absolute -right-2 -top-2 select-none text-[5rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
                       ML
                     </span>
                     <SheetTitle className="relative text-2xl font-black font-(family-name:--font-unbounded)">
-                      <span className="text-white">МЕТАЛЛ</span>
+                      <span className="text-neutral-900">МЕТАЛЛ</span>
                       <span className="text-primary">ЛИДЕР</span>
                     </SheetTitle>
-                    <p className="relative mt-1 text-xs text-white/30">Металлопрокат оптом и в розницу</p>
+                    <p className="relative mt-1 text-xs text-neutral-400">Металлопрокат оптом и в розницу</p>
                   </div>
 
                   {/* Catalog CTA */}
@@ -192,12 +192,12 @@ export function Header() {
                         key={link.href}
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="group flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-white/5 transition-all"
+                        className="group flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-neutral-100 transition-all"
                       >
-                        <span className="text-[10px] font-black text-white/10 font-(family-name:--font-unbounded) w-5">
+                        <span className="text-[10px] font-black text-neutral-300 font-(family-name:--font-unbounded) w-5">
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors">
+                        <span className="text-sm font-medium text-neutral-600 group-hover:text-neutral-900 transition-colors">
                           {link.label}
                         </span>
                       </Link>
@@ -208,7 +208,7 @@ export function Header() {
                   <div className="px-5 mb-3">
                     <button
                       onClick={() => { window.dispatchEvent(new Event("open-ai-chat")); setMobileOpen(false); }}
-                      className="flex w-full items-center justify-between rounded-2xl bg-white/8 p-4 text-white hover:bg-white/12 transition-all cursor-pointer"
+                      className="flex w-full items-center justify-between rounded-2xl bg-neutral-100 p-4 text-neutral-900 hover:bg-neutral-200 transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -219,21 +219,21 @@ export function Header() {
                             AI Помощник
                             <Sparkles className="h-3 w-3 text-primary" />
                           </span>
-                          <p className="text-[10px] text-white/30">Эксперт по металлопрокату</p>
+                          <p className="text-[10px] text-neutral-400">Эксперт по металлопрокату</p>
                         </div>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-white/30" />
+                      <ArrowRight className="h-4 w-4 text-neutral-400" />
                     </button>
                   </div>
 
-                  <div className="mx-5 my-4 h-px bg-white/5" />
+                  <div className="mx-5 my-4 h-px bg-neutral-200" />
 
                   {/* Action cards */}
                   <div className="px-5 grid grid-cols-2 gap-2">
                     <Link
                       href="/favorites"
                       onClick={() => setMobileOpen(false)}
-                      className="relative flex flex-col items-center gap-2 rounded-2xl bg-white/5 p-4 text-white/40 hover:bg-white/10 hover:text-white transition-all"
+                      className="relative flex flex-col items-center gap-2 rounded-2xl bg-neutral-100 p-4 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 transition-all"
                     >
                       <Heart className="h-5 w-5" />
                       <span className="text-[11px] font-medium">Избранное</span>
@@ -246,7 +246,7 @@ export function Header() {
                     <Link
                       href="/cart"
                       onClick={() => setMobileOpen(false)}
-                      className="relative flex flex-col items-center gap-2 rounded-2xl bg-white/5 p-4 text-white/40 hover:bg-white/10 hover:text-white transition-all"
+                      className="relative flex flex-col items-center gap-2 rounded-2xl bg-neutral-100 p-4 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 transition-all"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       <span className="text-[11px] font-medium">Корзина</span>
@@ -258,7 +258,7 @@ export function Header() {
                     </Link>
                   </div>
 
-                  <div className="mx-5 my-4 h-px bg-white/5" />
+                  <div className="mx-5 my-4 h-px bg-neutral-200" />
 
                   {/* Account */}
                   {session?.user ? (
@@ -266,14 +266,14 @@ export function Header() {
                       <Link
                         href="/profile"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-neutral-100 transition-all"
                       >
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
                           <User className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <span className="text-sm font-medium text-white">Личный кабинет</span>
-                          <p className="text-[10px] text-white/30">Мои заказы и настройки</p>
+                          <span className="text-sm font-medium text-neutral-900">Личный кабинет</span>
+                          <p className="text-[10px] text-neutral-400">Мои заказы и настройки</p>
                         </div>
                       </Link>
                     </div>
@@ -282,14 +282,14 @@ export function Header() {
                       <Link
                         href="/login"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-neutral-100 transition-all"
                       >
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
                           <User className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <span className="text-sm font-medium text-white">Войти</span>
-                          <p className="text-[10px] text-white/30">Авторизация</p>
+                          <span className="text-sm font-medium text-neutral-900">Войти</span>
+                          <p className="text-[10px] text-neutral-400">Авторизация</p>
                         </div>
                       </Link>
                     </div>
@@ -297,20 +297,20 @@ export function Header() {
 
                   {/* Contact block */}
                   <div className="px-5 pb-8">
-                    <div className="rounded-2xl bg-white/5 p-5">
+                    <div className="rounded-2xl bg-neutral-50 p-5 border border-neutral-200">
                       <a
                         href={`tel:${contactInfo.phoneRaw}`}
-                        className="text-xl font-black text-white hover:text-primary transition-colors font-(family-name:--font-unbounded)"
+                        className="text-xl font-black text-neutral-900 hover:text-primary transition-colors font-(family-name:--font-unbounded)"
                       >
                         {contactInfo.phone}
                       </a>
                       <div className="mt-3 space-y-2">
-                        <div className="flex items-center gap-2 text-[11px] text-white/40">
-                          <Clock className="h-3 w-3 text-primary/50" />
+                        <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+                          <Clock className="h-3 w-3 text-primary" />
                           {contactInfo.workingHours}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-white/40">
-                          <MapPin className="h-3 w-3 text-primary/50" />
+                        <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+                          <MapPin className="h-3 w-3 text-primary" />
                           {contactInfo.warehouse}
                         </div>
                       </div>

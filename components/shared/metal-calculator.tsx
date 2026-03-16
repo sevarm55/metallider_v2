@@ -80,7 +80,7 @@ const shapes: Record<ShapeType, ShapeConfig> = {
 
 // SVG shape illustrations
 function ShapeIllustration({ type, isActive }: { type: ShapeType; isActive: boolean }) {
-  const color = isActive ? "#ffffff" : "#a3a3a3";
+  const color = isActive ? "#f97316" : "#a3a3a3";
   const opacity = isActive ? 1 : 0.5;
 
   switch (type) {
@@ -143,16 +143,16 @@ export function MetalCalculator() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-zinc-800">
+    <div className="relative overflow-hidden rounded-3xl bg-white border border-neutral-200">
       {/* Background decorative */}
-      <span className="pointer-events-none absolute -right-8 -top-8 select-none text-[12rem] font-black leading-none text-white/2 font-(family-name:--font-unbounded)">
+      <span className="pointer-events-none absolute -right-8 -top-8 select-none text-[12rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
         КГ
       </span>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(var(--color-primary),0.08),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(var(--color-primary),0.06),transparent_60%)]" />
 
       <div className="relative grid lg:grid-cols-12">
         {/* Left — shape tabs + illustration */}
-        <div className="lg:col-span-4 p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-white/10">
+        <div className="lg:col-span-4 p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-neutral-200">
           {/* Shape tabs */}
           <div className="grid grid-cols-2 gap-2 mb-6">
             {(Object.entries(shapes) as [ShapeType, ShapeConfig][]).map(([key, s]) => (
@@ -162,14 +162,14 @@ export function MetalCalculator() {
                 className={cn(
                   "relative flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-300 cursor-pointer",
                   activeShape === key
-                    ? "bg-white/10 ring-1 ring-primary/40 shadow-[0_0_20px_rgba(var(--color-primary),0.15)]"
-                    : "bg-white/5 hover:bg-white/8",
+                    ? "bg-primary/10 ring-1 ring-primary/40 shadow-[0_0_20px_rgba(var(--color-primary),0.15)]"
+                    : "bg-neutral-50 hover:bg-neutral-100",
                 )}
               >
                 <ShapeIllustration type={key} isActive={activeShape === key} />
                 <span className={cn(
                   "text-xs font-semibold transition-colors",
-                  activeShape === key ? "text-white" : "text-neutral-500",
+                  activeShape === key ? "text-primary" : "text-neutral-500",
                 )}>
                   {s.shortLabel}
                 </span>
@@ -182,7 +182,7 @@ export function MetalCalculator() {
 
           {/* Shape info */}
           <div className="hidden lg:block">
-            <div className="rounded-xl bg-white/5 p-4">
+            <div className="rounded-xl bg-neutral-50 p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-4 w-4 text-primary" />
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
@@ -204,7 +204,7 @@ export function MetalCalculator() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
               <ShapeIllustration type={activeShape} isActive />
             </div>
-            <h3 className="text-lg font-bold text-white font-(family-name:--font-unbounded)">
+            <h3 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded)">
               {shape.label}
             </h3>
           </div>
@@ -223,9 +223,9 @@ export function MetalCalculator() {
                     placeholder={f.placeholder}
                     value={values[f.key] || ""}
                     onChange={(e) => setValues((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-base font-semibold text-white placeholder:text-neutral-600 outline-none focus:border-primary/50 focus:bg-white/8 focus:ring-1 focus:ring-primary/30 transition-all"
+                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 pr-12 text-base font-semibold text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-primary/50 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 bg-white/5 px-1.5 py-0.5 rounded">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
                     {f.unit}
                   </span>
                 </div>
@@ -242,9 +242,9 @@ export function MetalCalculator() {
                   placeholder="1"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-base font-semibold text-white placeholder:text-neutral-600 outline-none focus:border-primary/50 focus:bg-white/8 focus:ring-1 focus:ring-primary/30 transition-all"
+                  className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 pr-12 text-base font-semibold text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-primary/50 focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 bg-white/5 px-1.5 py-0.5 rounded">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
                   шт
                 </span>
               </div>
@@ -256,7 +256,7 @@ export function MetalCalculator() {
             "relative overflow-hidden rounded-2xl p-6 transition-all duration-500",
             result
               ? "bg-linear-to-r from-primary/20 via-primary/10 to-transparent border border-primary/20"
-              : "bg-white/5 border border-white/10",
+              : "bg-neutral-50 border border-neutral-200",
           )}>
             {result ? (
               <>
@@ -271,16 +271,16 @@ export function MetalCalculator() {
                       <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">
                         Общий вес
                       </p>
-                      <p className="text-3xl font-black text-white font-(family-name:--font-unbounded)">
+                      <p className="text-3xl font-black text-neutral-900 font-(family-name:--font-unbounded)">
                         {result.weight.toLocaleString("ru-RU")}
                         <span className="ml-1.5 text-base font-bold text-neutral-400">{shape.resultUnit}</span>
                       </p>
                     </div>
                   </div>
                   {result.qty > 1 && (
-                    <div className="rounded-xl bg-white/10 backdrop-blur px-4 py-2.5">
+                    <div className="rounded-xl bg-neutral-100 px-4 py-2.5">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-0.5">За 1 штуку</p>
-                      <p className="text-lg font-bold text-white">
+                      <p className="text-lg font-bold text-neutral-900">
                         {(result.weight / result.qty).toLocaleString("ru-RU", { maximumFractionDigits: 2 })}
                         <span className="ml-1 text-xs text-neutral-400">{shape.resultUnit}</span>
                       </p>
@@ -290,7 +290,7 @@ export function MetalCalculator() {
               </>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100">
                   <Ruler className="h-5 w-5 text-neutral-500" />
                 </div>
                 <p className="text-sm text-neutral-500">

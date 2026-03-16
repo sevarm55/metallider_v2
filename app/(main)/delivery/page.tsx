@@ -38,8 +38,8 @@ export default function DeliveryPage() {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-zinc-800">
-        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+      <section className="relative overflow-hidden bg-neutral-50">
+        <span className="pointer-events-none absolute top-4 left-0 select-none text-[clamp(5rem,14vw,14rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           ДОСТАВКА
         </span>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
@@ -47,9 +47,9 @@ export default function DeliveryPage() {
         <Container className="relative py-10 lg:py-16">
           <Breadcrumb className="mb-8">
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-white">Главная</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-neutral-400 hover:text-neutral-900">Главная</Link></BreadcrumbLink></BreadcrumbItem>
               <BreadcrumbSeparator className="text-neutral-600" />
-              <BreadcrumbItem><BreadcrumbPage className="text-white">Доставка</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbPage className="text-neutral-900">Доставка</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
@@ -57,7 +57,7 @@ export default function DeliveryPage() {
             <span className="block h-7 w-1 rounded-full bg-primary" />
             <span className="text-sm font-bold uppercase tracking-widest text-primary">Логистика</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+          <h1 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
             Доставка
           </h1>
           <p className="mt-3 text-neutral-400 max-w-xl">
@@ -71,8 +71,8 @@ export default function DeliveryPage() {
         <Container>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {advantages.map((a, idx) => (
-              <div key={a.title} className="group relative overflow-hidden rounded-2xl bg-zinc-800 p-6 transition-all duration-300 hover:shadow-2xl">
-                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+              <div key={a.title} className="group relative overflow-hidden rounded-2xl bg-white p-6 transition-all duration-300 hover:shadow-2xl">
+                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
                 <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full bg-linear-to-br ${a.gradient} opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-20`} />
@@ -80,7 +80,7 @@ export default function DeliveryPage() {
                   <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br ${a.gradient} shadow-lg`}>
                     <a.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="mt-4 text-lg font-bold text-white">{a.title}</h3>
+                  <h3 className="mt-4 text-lg font-bold text-neutral-900">{a.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-400">{a.desc}</p>
                 </div>
               </div>
@@ -134,8 +134,8 @@ export default function DeliveryPage() {
       {/* ── Pickup ── */}
       <section className="py-12 lg:py-16">
         <Container>
-          <div className="relative overflow-hidden rounded-2xl bg-zinc-800 p-8 lg:p-10">
-            <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[8rem] font-black leading-none text-white/3 font-(family-name:--font-unbounded)">
+          <div className="relative overflow-hidden rounded-2xl bg-white p-8 lg:p-10">
+            <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[8rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
               FREE
             </span>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.1),transparent_50%)]" />
@@ -145,18 +145,18 @@ export default function DeliveryPage() {
                 <CheckCircle2 className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-extrabold text-white font-(family-name:--font-unbounded)">
+                <h2 className="text-2xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded)">
                   Бесплатный самовывоз
                 </h2>
                 <p className="mt-2 text-sm text-neutral-400 leading-relaxed max-w-lg">
                   Забирайте заказ бесплатно с нашего склада. Помощь при погрузке включена.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-4">
-                  <span className="flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-neutral-300">
+                  <span className="flex items-center gap-2 rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-2 text-sm text-neutral-300">
                     <MapPin className="h-4 w-4 text-emerald-400" />
                     {contactInfo.address}
                   </span>
-                  <span className="flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-neutral-300">
+                  <span className="flex items-center gap-2 rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-2 text-sm text-neutral-300">
                     <Clock className="h-4 w-4 text-emerald-400" />
                     {contactInfo.workingHours}
                   </span>
@@ -199,8 +199,8 @@ export default function DeliveryPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="relative overflow-hidden bg-zinc-800 py-16 lg:py-20">
-        <span className="pointer-events-none absolute top-4 right-0 select-none text-[clamp(4rem,10vw,10rem)] font-black uppercase leading-none text-white/3 font-(family-name:--font-unbounded)">
+      <section className="relative overflow-hidden bg-neutral-50 py-16 lg:py-20">
+        <span className="pointer-events-none absolute top-4 right-0 select-none text-[clamp(4rem,10vw,10rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           ЗВОНИТЕ
         </span>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--color-primary),0.08),transparent_60%)]" />
@@ -210,7 +210,7 @@ export default function DeliveryPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
               <Truck className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-extrabold text-white md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
+            <h2 className="text-2xl font-extrabold text-neutral-900 md:text-3xl lg:text-4xl font-(family-name:--font-unbounded)">
               Нужна доставка?
             </h2>
             <p className="mt-3 text-neutral-400 max-w-md">
@@ -223,7 +223,7 @@ export default function DeliveryPage() {
                   {contactInfo.phone}
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base font-bold border-white/20 bg-transparent text-white hover:bg-white/10 rounded-xl">
+              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base font-bold border-neutral-200 bg-transparent text-neutral-900 hover:bg-neutral-100 rounded-xl">
                 <Link href="/contacts">Контакты</Link>
               </Button>
             </div>
