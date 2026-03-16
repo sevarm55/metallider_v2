@@ -42,14 +42,6 @@ const advantages = [
   },
 ];
 
-const categoryImages: Record<string, string> = {
-  "truba-profilnaya": "/images/categories/truby.webp",
-  "truba-kruglaya": "/images/categories/truba-kruglaya.png",
-  "listy": "/images/categories/listy.webp",
-  "sortovoj-prokat": "/images/categories/fasonniy.webp",
-  "krovlya-i-fasad": "/images/categories/listy.webp",
-  "metizy-i-furnitura": "/images/categories/metizy.webp",
-};
 
 export default async function HomePage() {
   const [dbCategories, dbProducts] = await Promise.all([
@@ -60,6 +52,7 @@ export default async function HomePage() {
         id: true,
         name: true,
         slug: true,
+        image: true,
         _count: { select: { products: { where: { isActive: true } } } },
         children: {
           where: { isActive: true },
@@ -146,7 +139,7 @@ export default async function HomePage() {
           <div className="flex gap-5 overflow-x-auto -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8 pb-6 scrollbar-hide snap-x snap-mandatory">
             {dbCategories.map((parent, idx) => {
               const totalProducts = parent._count.products + parent.children.reduce((acc, sub) => acc + sub._count.products, 0);
-              const image = categoryImages[parent.slug];
+              const image = parent.image;
 
               return (
                 <Link
@@ -306,10 +299,10 @@ export default async function HomePage() {
             {advantages.map((adv, idx) => (
               <div
                 key={adv.title}
-                className="group relative overflow-hidden rounded-2xl bg-zinc-800  p-6 transition-all duration-300 hover:shadow-2xl"
+                className="group relative overflow-hidden rounded-2xl bg-white  p-6 transition-all duration-300 hover:shadow-2xl"
               >
                 {/* Background number */}
-                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-white/5 font-(family-name:--font-unbounded)">
+                <span className="pointer-events-none absolute -right-2 -top-4 select-none text-[5rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
 
@@ -317,7 +310,7 @@ export default async function HomePage() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white">
                     <adv.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-4 text-lg font-bold text-white">
+                  <h3 className="mt-4 text-lg font-bold text-neutral-900">
                     {adv.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-400">
@@ -331,9 +324,9 @@ export default async function HomePage() {
       </section>
 
       {/* About + Contact */}
-      <section className="relative overflow-hidden bg-zinc-800  py-16 lg:py-24">
+      <section className="relative overflow-hidden bg-neutral-50  py-16 lg:py-24">
         {/* Background decorative text */}
-        <span className="pointer-events-none absolute top-6 left-0 select-none text-[clamp(5rem,12vw,12rem)] font-black uppercase leading-none text-white/[0.03] font-(family-name:--font-unbounded)">
+        <span className="pointer-events-none absolute top-6 left-0 select-none text-[clamp(5rem,12vw,12rem)] font-black uppercase leading-none text-neutral-100 font-(family-name:--font-unbounded)">
           METALLLIDER
         </span>
 
@@ -347,7 +340,7 @@ export default async function HomePage() {
                     О компании
                   </span>
                 </div>
-                <h2 className="text-3xl font-extrabold text-white md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+                <h2 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
                   Металл<span className="text-primary">Лидер</span>
                 </h2>
                 <p className="mt-6 text-base leading-relaxed text-neutral-400 max-w-2xl">
@@ -368,7 +361,7 @@ export default async function HomePage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="rounded-xl h-12 px-6 text-sm font-bold border-white/20 bg-transparent text-white hover:bg-white/10"
+                    className="rounded-xl h-12 px-6 text-sm font-bold border-neutral-200 bg-transparent text-neutral-900 hover:bg-neutral-100"
                   >
                     <Link href="/contacts">Связаться с нами</Link>
                   </Button>
@@ -377,8 +370,8 @@ export default async function HomePage() {
 
             {/* Contact card — 2 cols */}
             <div className="lg:col-span-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-                <h3 className="text-lg font-bold text-white font-(family-name:--font-unbounded)">
+              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 backdrop-blur-sm">
+                <h3 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded)">
                   Наш склад
                 </h3>
                 <p className="mt-1 text-sm text-primary font-semibold">
@@ -387,7 +380,7 @@ export default async function HomePage() {
 
                 <div className="mt-5 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <MapPin className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -396,7 +389,7 @@ export default async function HomePage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <Clock className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -406,14 +399,14 @@ export default async function HomePage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <Phone className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs text-neutral-500 uppercase tracking-wider">Телефон</p>
                       <a
                         href={`tel:${contactInfo.phoneRaw}`}
-                        className="mt-0.5 block text-lg font-bold text-white hover:text-primary transition-colors"
+                        className="mt-0.5 block text-lg font-bold text-neutral-900 hover:text-primary transition-colors"
                       >
                         {contactInfo.phone}
                       </a>

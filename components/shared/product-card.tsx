@@ -196,7 +196,7 @@ export function ProductCard({
 
       <div
 
-        className="group relative flex flex-col overflow-hidden rounded-2xl bg-zinc-800  transition-all duration-300 hover:shadow-2xl"
+        className="group relative flex flex-col overflow-hidden rounded-2xl bg-[#f0f0f0] transition-all duration-300 hover:shadow-2xl"
 
       >
 
@@ -246,7 +246,7 @@ export function ProductCard({
 
                 ? "bg-red-500 text-white shadow-lg shadow-red-500/30"
 
-                : "bg-neutral-100 text-neutral-400 hover:bg-red-500 hover:text-white",
+                : "bg-[#f0f0f0] text-neutral-400 hover:bg-red-500 hover:text-white",
 
             )}
 
@@ -370,7 +370,7 @@ export function ProductCard({
 
                       ? "w-4 bg-primary"
 
-                      : "w-1.5 bg-neutral-300 hover:bg-neutral-400",
+                      : "w-1.5 bg-[#f0f0f0] hover:bg-neutral-400",
 
                   )}
 
@@ -391,14 +391,14 @@ export function ProductCard({
               "before:absolute before:-left-4 before:bottom-0 before:h-4 before:w-4 before:mask-[radial-gradient(circle_at_top_left,transparent_16px,black_16px)]",
               hasDiscount
                 ? "bg-red-500 before:bg-red-500"
-                : "bg-zinc-800 before:bg-zinc-800",
+                : "bg-[#f0f0f0] before:bg-[#f0f0f0]",
             )}
           >
             <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-black text-white">
+              <span className={cn("text-lg font-black", hasDiscount ? "text-white" : "text-neutral-900")}>
                 {(hasDiscount ? specialPrice : price).toLocaleString("ru-RU")}
               </span>
-              <span className="text-xs font-bold text-white/60">
+              <span className={cn("text-xs font-bold", hasDiscount ? "text-white/60" : "text-neutral-400")}>
                 &#8381;/{unit}
               </span>
               {hasDiscount && (
@@ -415,7 +415,7 @@ export function ProductCard({
 
         {/* ── Dark content ── */}
 
-        <div className="relative flex flex-1 flex-col px-4 pt-3 pb-4 -mt-px before:absolute before:top-0 before:left-0 before:h-4 before:w-4 before:bg-natural-700 before:mask-[radial-gradient(circle_at_bottom_right,transparent_16px,black_16px)]">
+        <div className="relative flex flex-1 flex-col px-4 pt-3 pb-4 -mt-px bg-[#f0f0f0] before:absolute before:top-0 before:left-0 before:h-4 before:w-4 before:bg-[#f0f0f0] before:mask-[radial-gradient(circle_at_bottom_right,transparent_16px,black_16px)]">
 
           {/* Title */}
 
@@ -423,7 +423,7 @@ export function ProductCard({
 
             href={`/product/${slug}`}
 
-            className="text-sm font-bold leading-snug text-white hover:text-primary transition-colors line-clamp-2"
+            className="text-sm font-bold leading-snug text-neutral-900 hover:text-primary transition-colors line-clamp-2"
 
           >
 
@@ -445,11 +445,11 @@ export function ProductCard({
 
                   key={i}
 
-                  className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] text-neutral-400"
+                  className="rounded-md bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-neutral-500"
 
                 >
 
-                  {a.name}: <span className="font-semibold text-neutral-200">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
+                  {a.name}: <span className="font-semibold text-neutral-700">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
 
                 </span>
 
@@ -487,7 +487,7 @@ export function ProductCard({
 
                 unit={unit}
 
-                className="h-9 w-auto rounded-lg bg-white/10 border-0 text-white"
+                className="h-9 w-auto rounded-lg bg-[#f0f0f0] border border-neutral-300 text-neutral-900"
 
               />
 
@@ -497,7 +497,7 @@ export function ProductCard({
 
                 className={cn(
 
-                  "flex flex-1 items-center justify-center gap-2 rounded-lg h-9 text-xs font-bold transition-all",
+                  "flex flex-1 items-center justify-center gap-2 rounded-lg h-9 text-xs font-bold transition-all cursor-pointer",
 
                   added
 
@@ -536,7 +536,7 @@ export function ProductCard({
 
               onClick={() => setQuickOrderOpen(true)}
 
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 py-2 text-[11px] font-semibold text-neutral-400 hover:border-primary hover:text-primary transition-all"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 py-2 text-[11px] font-semibold text-neutral-500 hover:border-primary hover:text-primary transition-all cursor-pointer"
 
             >
 

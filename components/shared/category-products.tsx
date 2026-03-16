@@ -49,60 +49,56 @@ export function CategoryProducts({ products, subcategories, parentSlug }: Catego
           {parentSlug ? (
             <Link
               href={`/catalog/${parentSlug}`}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 bg-neutral-900 text-white shadow-lg"
+              className="group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
             >
-              <span className="text-2xl font-black font-(family-name:--font-unbounded) text-white">
-                {products.length}
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">Все товары</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 text-primary" />
-              </div>
+              <span className="text-sm font-semibold">Все товары</span>
+              <span className="text-xs text-primary font-medium">{products.length}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 text-primary" />
             </Link>
           ) : (
             <button
               onClick={() => setActiveSubId(null)}
               className={cn(
-                "group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 cursor-pointer",
+                "group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 cursor-pointer",
                 activeSubId === null
-                  ? "bg-neutral-900 text-white shadow-lg"
+                  ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
                   : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
               )}
             >
+              <span className="text-sm font-semibold">Все товары</span>
               <span className={cn(
-                "text-2xl font-black font-(family-name:--font-unbounded)",
-                activeSubId === null ? "text-white" : "text-neutral-900"
-              )}>
-                {products.length}
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">Все товары</span>
-                <ArrowRight className={cn(
-                  "h-4 w-4 transition-transform group-hover:translate-x-0.5",
-                  activeSubId === null ? "text-primary" : "text-neutral-400"
-                )} />
-              </div>
+                "text-xs font-medium",
+                activeSubId === null ? "text-primary" : "text-neutral-400"
+              )}>{products.length}</span>
+              <ArrowRight className={cn(
+                "h-4 w-4 transition-transform group-hover:translate-x-0.5",
+                activeSubId === null ? "text-primary" : "text-neutral-400"
+              )} />
             </button>
           )}
 
-          {/* Subcategory cards — always Link */}
+          {/* Subcategory cards */}
           {subcategories.map((sub) => (
-            <Link
+            <button
               key={sub.id}
-              href={`/catalog/${sub.slug}`}
+              onClick={() => setActiveSubId(sub.id)}
               className={cn(
-                "group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28",
-                "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                "group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 cursor-pointer",
+                activeSubId === sub.id
+                  ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
               )}
             >
-              <span className="text-2xl font-black font-(family-name:--font-unbounded) text-neutral-900">
-                {sub.count}
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-left">{sub.name}</span>
-                <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 text-neutral-400" />
-              </div>
-            </Link>
+              <span className="text-sm font-semibold">{sub.name}</span>
+              <span className={cn(
+                "text-xs font-medium",
+                activeSubId === sub.id ? "text-primary" : "text-neutral-400"
+              )}>{sub.count}</span>
+              <ArrowRight className={cn(
+                "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5",
+                activeSubId === sub.id ? "text-primary" : "text-neutral-400"
+              )} />
+            </button>
           ))}
         </div>
       )}

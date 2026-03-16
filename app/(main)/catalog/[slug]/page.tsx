@@ -269,37 +269,29 @@ export default async function CategoryPage({ params }: PageProps) {
             {/* All products card → parent category */}
             <Link
               href={`/catalog/${category.parent!.slug}`}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+              className="group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             >
-              <span className="text-2xl font-black font-(family-name:--font-unbounded) text-neutral-900">
-                {siblings.reduce((sum, s) => sum + s.count, 0)}
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">Все товары</span>
-                <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 text-neutral-400" />
-              </div>
+              <span className="text-sm font-semibold">Все товары</span>
+              <span className="text-xs font-medium text-neutral-400">{siblings.reduce((sum, s) => sum + s.count, 0)}</span>
+              <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 text-neutral-400" />
             </Link>
             {siblings.map((s) => (
               <Link
                 key={s.id}
                 href={`/catalog/${s.slug}`}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 transition-all duration-300 lg:w-40 lg:h-28 ${
+                className={`group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 ${
                   s.id === category.id
-                    ? "bg-zinc-800  text-white shadow-lg"
+                    ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
                     : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                 }`}
               >
-                <span className={`text-2xl font-black font-(family-name:--font-unbounded) ${
-                  s.id === category.id ? "text-white" : "text-neutral-900"
-                }`}>
-                  {s.count}
-                </span>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{s.name}</span>
-                  <ArrowRight className={`h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                    s.id === category.id ? "text-primary" : "text-neutral-400"
-                  }`} />
-                </div>
+                <span className="text-sm font-semibold">{s.name}</span>
+                <span className={`text-xs font-medium ${
+                  s.id === category.id ? "text-primary" : "text-neutral-400"
+                }`}>{s.count}</span>
+                <ArrowRight className={`h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                  s.id === category.id ? "text-primary" : "text-neutral-400"
+                }`} />
               </Link>
             ))}
           </div>

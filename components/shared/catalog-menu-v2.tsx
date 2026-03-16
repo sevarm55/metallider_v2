@@ -110,7 +110,7 @@ export function CatalogMenuV2() {
         href="/catalog"
         className={cn(
           "flex items-center gap-2 rounded-lg px-5 py-2 my-1.5 text-sm font-semibold text-white transition-colors",
-          open ? "bg-neutral-950/90" : "bg-neutral-950 hover:bg-neutral-800",
+          open ? "bg-primary/90" : "bg-primary hover:bg-primary/80",
         )}
       >
         <LayoutGrid className="h-4 w-4" />
@@ -152,10 +152,12 @@ export function CatalogMenuV2() {
                     const isActive = activeParent === cat.id;
                     const totalProducts = cat._count.products + cat.children.reduce((sum, c) => sum + c._count.products, 0);
                     return (
-                      <button
+                      <Link
                         key={cat.id}
+                        href={`/catalog/${cat.slug}`}
                         data-cat-id={cat.id}
                         onMouseEnter={() => setActiveParent(cat.id)}
+                        onClick={() => setOpen(false)}
                         className={cn(
                           "group relative flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors duration-200 cursor-pointer",
                           isActive ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-700",
@@ -178,7 +180,7 @@ export function CatalogMenuV2() {
                             ? "text-primary translate-x-0.5"
                             : "text-neutral-200 group-hover:text-neutral-400",
                         )} />
-                      </button>
+                      </Link>
                     );
                   })}
 
@@ -195,21 +197,26 @@ export function CatalogMenuV2() {
 
                 {/* ── Right content with subtle pattern ── */}
                 {activeCat && (
-                  <div className="flex-1 overflow-y-auto bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.008)_10px,rgba(0,0,0,0.008)_11px)] p-6">
+                  <div className="flex-1 overflow-y-auto bg-neutral-50 p-6">
                     {/* Category title */}
                     <div className="flex items-center justify-between mb-5">
-                      <div>
-                        <h3 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded)">
+                      <Link
+                        href={`/catalog/${activeCat.slug}`}
+                        onClick={() => setOpen(false)}
+                        className="group/title inline-block"
+                      >
+                        <h3 className="text-lg font-bold text-neutral-900 font-(family-name:--font-unbounded) relative inline-block">
                           {activeCat.name}
+                          <span className="absolute left-0 -bottom-0.5 h-[2px] w-0 bg-primary rounded-full transition-all duration-300 ease-out group-hover/title:w-full" />
                         </h3>
                         <p className="text-xs text-neutral-400 mt-0.5">
                           {activeCat.children.length} подкатегорий
                         </p>
-                      </div>
+                      </Link>
                       <Link
                         href={`/catalog/${activeCat.slug}`}
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-primary transition-colors"
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/80 transition-colors"
                       >
                         Все товары <ArrowRight className="h-3 w-3" />
                       </Link>
@@ -223,7 +230,7 @@ export function CatalogMenuV2() {
                             key={sub.id}
                             href={`/catalog/${sub.slug}`}
                             onClick={() => setOpen(false)}
-                            className="group flex items-center justify-between rounded-xl bg-white/80 backdrop-blur-sm px-4 py-3 border border-neutral-100 hover:border-primary/20 hover:shadow-sm transition-all"
+                            className="group flex items-center justify-between rounded-xl bg-white px-4 py-3 border border-neutral-200 hover:border-primary/30 hover:shadow-md transition-all"
                           >
                             <div className="min-w-0">
                               <span className="text-sm font-medium text-neutral-800 group-hover:text-neutral-900">
@@ -260,7 +267,7 @@ export function CatalogMenuV2() {
                                   key={p.id}
                                   href={`/product/${p.slug}`}
                                   onClick={() => setOpen(false)}
-                                  className="group rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-100  hover:border-primary/20 hover:shadow-md transition-all"
+                                  className="group rounded-xl bg-white border border-neutral-200 hover:border-primary/30 hover:shadow-md transition-all"
                                 >
                                   <div className="flex aspect-square items-center justify-center rounded-lg bg-neutral-50 mb-2 overflow-hidden">
                                     {p.images[0] ? (
