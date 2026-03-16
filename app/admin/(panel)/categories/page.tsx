@@ -237,7 +237,7 @@ export default function CategoriesPage() {
                     <div className={`flex items-center gap-3 ${cat.parentId ? "pl-6" : ""}`}>
                       {cat.image ? (
                         <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded-md bg-neutral-100">
-                          <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+                          <img src={cat.image} alt={cat.name} className="absolute inset-0 h-full w-full object-cover" />
                         </div>
                       ) : (
                         <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-md bg-neutral-100">
@@ -367,7 +367,7 @@ export default function CategoriesPage() {
               {form.image ? (
                 <div className="relative group">
                   <div className="relative h-40 w-full overflow-hidden rounded-xl border bg-neutral-50">
-                    <Image src={form.image} alt="Превью" fill className="object-cover" />
+                    <img src={form.image} alt="Превью" className="absolute inset-0 h-full w-full object-cover" />
                   </div>
                   <button
                     type="button"
