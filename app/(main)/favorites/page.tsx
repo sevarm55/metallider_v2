@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { Container } from "@/components/shared/container";

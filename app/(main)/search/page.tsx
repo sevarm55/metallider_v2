@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import { Container } from "@/components/shared/container";
 import { ProductsView } from "@/components/shared/products-view";
