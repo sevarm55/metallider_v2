@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Flame, Percent, Gift, ArrowRight, Phone, Scissors, BadgePercent, Sparkles } from "lucide-react";

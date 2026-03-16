@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Image from "next/image";
 import Link from "next/link";
 import { Truck, Shield, BadgePercent, Headset, ArrowRight, MapPin, Clock, Phone } from "lucide-react";

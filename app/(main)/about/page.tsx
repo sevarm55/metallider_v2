@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Award, Users, ShieldCheck, Target, TrendingUp, Phone, CheckCircle2, Factory } from "lucide-react";

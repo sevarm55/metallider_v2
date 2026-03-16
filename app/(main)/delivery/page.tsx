@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Truck, Clock, MapPin, Package, CheckCircle2, AlertCircle, Phone } from "lucide-react";
