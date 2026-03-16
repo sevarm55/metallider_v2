@@ -5,11 +5,12 @@ import { getUserSession } from "@/lib/get-user-session";
 
 interface OrderItemBody {
   id: string;
-  name: string;
-  price: number;
-  specialPrice?: number;
   quantity: number;
-  unit: string;
+  // Optional fields from client (fallback)
+  name?: string;
+  price?: number;
+  specialPrice?: number;
+  unit?: string;
 }
 
 interface OrderBody {
@@ -20,7 +21,6 @@ interface OrderBody {
   address?: string;
   comment?: string;
   items: OrderItemBody[];
-  totalPrice: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -41,12 +41,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calculate effective prices
+    // Fetch actual prices from DB
+    const productIds = body.items.map((i) => i.id);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, name: true, price: true, specialPrice: true, unit: true },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
     const orderItems = body.items.map((item) => {
+      const product = productMap.get(item.id);
+      if (!product) throw new Error(`Товар ${item.id} не найден`);
       const effectivePrice =
-        item.specialPrice && item.specialPrice > 0 && item.specialPrice < item.price
-          ? item.specialPrice
-          : item.price;
+        product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price
+          ? product.specialPrice
+          : product.price;
       return {
         productId: item.id,
         qty: item.quantity,
@@ -84,12 +93,12 @@ export async function POST(req: NextRequest) {
     // Send to Telegram
     const itemsText = body.items
       .map((item, i) => {
-        const price =
-          item.specialPrice && item.specialPrice > 0 && item.specialPrice < item.price
-            ? item.specialPrice
-            : item.price;
-        const total = price * item.quantity;
-        return `${i + 1}. ${item.name}\n   ${price}₽ × ${item.quantity} ${item.unit} = ${total.toLocaleString("ru-RU")}₽`;
+        const product = productMap.get(item.id);
+        const effectivePrice = orderItems[i].price;
+        const total = orderItems[i].total;
+        const unitLabels: Record<string, string> = { PCS: "шт", METER: "м", M2: "м²", KG: "кг", PACK: "уп", SET: "компл" };
+        const unit = product ? (unitLabels[product.unit] || "шт") : "шт";
+        return `${i + 1}. ${product?.name || item.id}\n   ${effectivePrice}₽ × ${item.quantity} ${unit} = ${total.toLocaleString("ru-RU")}₽`;
       })
       .join("\n");
 
