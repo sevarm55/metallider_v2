@@ -143,7 +143,7 @@ function ListItem({ product }: { product: Product }) {
   const imgSrc = product.images?.[0] || product.image;
 
   return (
-    <div className="group flex gap-3 rounded-2xl bg-zinc-800 p-2 transition-all duration-300 hover:shadow-xl">
+    <div className="group flex gap-3 rounded-2xl bg-neutral-50 border border-neutral-200 p-2 transition-all duration-300 hover:shadow-xl">
       {/* Image */}
       <Link
         href={`/product/${product.slug}`}
@@ -162,7 +162,7 @@ function ListItem({ product }: { product: Product }) {
         </div>
         {/* Badges */}
         {hasDiscount && (
-          <span className="absolute left-0 top-1.5 rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white">
+          <span className="absolute left-0 top-1.5 rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-neutral-900">
             -{Math.round(((product.price - product.specialPrice!) / product.price) * 100)}%
           </span>
         )}
@@ -178,7 +178,7 @@ function ListItem({ product }: { product: Product }) {
             "absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full transition-all",
             isFavorite
               ? "bg-red-500 text-white"
-              : "bg-white/10 text-neutral-400 hover:text-red-500",
+              : "bg-neutral-100 text-neutral-400 hover:text-red-500",
           )}
         >
           <Heart className={cn("h-3.5 w-3.5", isFavorite && "fill-white")} />
@@ -186,7 +186,7 @@ function ListItem({ product }: { product: Product }) {
 
         <Link
           href={`/product/${product.slug}`}
-          className="text-sm font-bold text-white hover:text-primary transition-colors line-clamp-2 leading-snug pr-8"
+          className="text-sm font-bold text-neutral-900 hover:text-primary transition-colors line-clamp-2 leading-snug pr-8"
         >
           {product.name}
         </Link>
@@ -197,7 +197,7 @@ function ListItem({ product }: { product: Product }) {
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5 mt-auto">
-          <span className="text-lg font-black text-white">
+          <span className="text-lg font-black text-neutral-900">
             {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")}
           </span>
           <span className="text-[10px] text-neutral-400">&#8381;/{product.unit}</span>
@@ -217,7 +217,7 @@ function ListItem({ product }: { product: Product }) {
             step={product.unit === "м²" ? 0.5 : 1}
             min={product.unit === "м²" ? 0.5 : 1}
             unit={product.unit}
-            className="h-8 w-auto rounded-lg bg-white/10 border-0 text-white"
+            className="h-8 w-auto rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-900"
           />
           <button
             onClick={handleAdd}
@@ -288,13 +288,13 @@ function TableRowItem({ product }: { product: Product }) {
   const imgSrc = product.images?.[0] || product.image;
 
   return (
-    <div className="group relative flex items-center gap-4 rounded-2xl bg-zinc-800 p-2 pr-4 transition-all duration-300 hover:shadow-xl">
+    <div className="group relative flex items-center gap-4 rounded-xl bg-neutral-50 border border-neutral-200 p-1.5 pr-4 transition-all duration-300 hover:shadow-xl">
       {/* Image */}
       <Link
         href={`/product/${product.slug}`}
         className="relative shrink-0 overflow-hidden rounded-xl bg-white"
       >
-        <div className="flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center">
+        <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center">
           {imgSrc ? (
             <img
               src={imgSrc}
@@ -309,7 +309,7 @@ function TableRowItem({ product }: { product: Product }) {
         {(hasDiscount || product.isHit || product.isNew) && (
           <div className="absolute left-0 top-1.5 flex flex-col gap-0.5">
             {hasDiscount && (
-              <span className="rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white">
+              <span className="rounded-r-md bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-neutral-900">
                 -{discountPercent}%
               </span>
             )}
@@ -332,7 +332,7 @@ function TableRowItem({ product }: { product: Product }) {
         {/* Name + code */}
         <Link
           href={`/product/${product.slug}`}
-          className="text-sm font-bold text-white hover:text-primary transition-colors line-clamp-2 leading-snug"
+          className="text-sm font-bold text-neutral-900 hover:text-primary transition-colors line-clamp-2 leading-snug"
         >
           {product.name}
         </Link>
@@ -346,9 +346,9 @@ function TableRowItem({ product }: { product: Product }) {
             {product.attributes.slice(0, 3).map((a, i) => (
               <span
                 key={i}
-                className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] text-neutral-400"
+                className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-400"
               >
-                {a.name}: <span className="text-neutral-200">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
+                {a.name}: <span className="text-neutral-700">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
               </span>
             ))}
           </div>
@@ -356,7 +356,7 @@ function TableRowItem({ product }: { product: Product }) {
 
         {/* Price — mobile */}
         <div className="flex items-baseline gap-2 sm:hidden mt-1">
-          <span className="text-base font-black text-white">
+          <span className="text-base font-black text-neutral-900">
             {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")} &#8381;
           </span>
           <span className="text-[10px] text-neutral-400">/{product.unit}</span>
@@ -376,7 +376,7 @@ function TableRowItem({ product }: { product: Product }) {
           </span>
         )}
         <div className="flex items-baseline gap-1">
-          <span className="text-lg font-black text-white">
+          <span className="text-lg font-black text-neutral-900">
             {(hasDiscount ? product.specialPrice : product.price)!.toLocaleString("ru-RU")}
           </span>
           <span className="text-[10px] text-neutral-400">&#8381;/{product.unit}</span>
@@ -393,7 +393,7 @@ function TableRowItem({ product }: { product: Product }) {
             "hidden sm:flex h-9 w-9 items-center justify-center rounded-lg transition-all",
             isFavorite
               ? "bg-red-500 text-white"
-              : "bg-white/10 text-neutral-400 hover:text-red-500",
+              : "bg-neutral-100 text-neutral-400 hover:text-red-500",
           )}
         >
           <Heart className={cn("h-4 w-4", isFavorite && "fill-white")} />
@@ -408,7 +408,7 @@ function TableRowItem({ product }: { product: Product }) {
             step={product.unit === "м²" ? 0.5 : 1}
             min={product.unit === "м²" ? 0.5 : 1}
             unit={product.unit}
-            className="h-9 w-auto rounded-lg bg-white/10 border-0 text-white"
+            className="h-9 w-auto rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-900"
           />
         </div>
 

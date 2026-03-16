@@ -74,7 +74,7 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
               {/* Image side */}
               <Link
                 href={`/catalog/${parent.slug}`}
-                className="relative block h-56 lg:h-auto lg:w-92 shrink-0 overflow-hidden"
+                className="relative block h-40 sm:h-56 lg:h-auto lg:w-92 shrink-0 overflow-hidden"
               >
                 {parent.image ? (
                   <Image
@@ -88,11 +88,11 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                     <Package className="h-14 w-14 text-neutral-300" />
                   </div>
                 )}
-                <div className="absolute inset-y-0 right-0 w-1/3 bg-linear-to-l from-neutral-50 to-transparent lg:left-auto" />
+                <div className="absolute inset-y-0 right-0 w-1/3 bg-linear-to-l from-neutral-50 to-transparent hidden lg:block" />
               </Link>
 
               {/* Content */}
-              <div className="flex-1 p-6 lg:p-8">
+              <div className="flex-1 p-4 sm:p-6 lg:p-8">
                 {/* Category header */}
                 <div className="flex items-center justify-between mb-5">
                   <Link href={`/catalog/${parent.slug}`} className="group/title">
@@ -104,7 +104,7 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                         {parent.totalProducts} товаров
                       </span>
                     </div>
-                    <h2 className="text-2xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded) group-hover/title:text-primary transition-colors">
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded) group-hover/title:text-primary transition-colors">
                       {parent.name}
                     </h2>
                   </Link>
@@ -117,19 +117,17 @@ export function CatalogClassic({ categories }: { categories: CatalogCategory[] }
                 </div>
 
                 {/* Subcategories grid */}
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="flex flex-col gap-1.5 sm:grid sm:grid-cols-2 sm:gap-2 lg:grid-cols-4">
                   {parent.children.map((sub) => (
                     <Link
                       key={sub.id}
                       href={`/catalog/${sub.slug}`}
-                      className="group/sub flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3 hover:bg-neutral-100 transition-all"
+                      className="group/sub flex items-center justify-between rounded-xl bg-white border border-neutral-200 px-4 py-2.5 hover:bg-neutral-50 hover:border-primary/20 transition-all"
                     >
-                      <div className="min-w-0">
-                        <span className="text-sm font-medium text-neutral-700 group-hover/sub:text-neutral-900 transition-colors line-clamp-1">
-                          {sub.name}
-                        </span>
-                      </div>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-neutral-300 group-hover/sub:text-primary group-hover/sub:translate-x-0.5 transition-all" />
+                      <span className="text-sm font-medium text-neutral-700 group-hover/sub:text-neutral-900 transition-colors">
+                        {sub.name}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 ml-2 text-neutral-300 group-hover/sub:text-primary group-hover/sub:translate-x-0.5 transition-all" />
                     </Link>
                   ))}
                 </div>
