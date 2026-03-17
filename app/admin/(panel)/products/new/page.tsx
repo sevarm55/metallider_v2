@@ -55,6 +55,8 @@ interface AttributeDef {
   key: string;
   type: string;
   unit: string | null;
+  groupId: string | null;
+  group: { id: string; name: string } | null;
 }
 
 export default function NewProductPage() {
@@ -430,11 +432,53 @@ export default function NewProductPage() {
                               <SelectValue placeholder="Атрибут" />
                             </SelectTrigger>
                             <SelectContent>
-                              {selectableAttrs.map((a) => (
-                                <SelectItem key={a.id} value={a.id}>
-                                  {a.name}
-                                </SelectItem>
-                              ))}
+                              {(() => {
+                                const grouped = new Map<string, AttributeDef[]>();
+                                const ungrouped: AttributeDef[] = [];
+                                selectableAttrs.forEach((a) => {
+                                  if (a.group) {
+                                    const list = grouped.get(a.group.id) || [];
+                                    list.push(a);
+                                    grouped.set(a.group.id, list);
+                                  } else {
+                                    ungrouped.push(a);
+                                  }
+                                });
+                                const groupNames = new Map<string, string>();
+                                selectableAttrs.forEach((a) => {
+                                  if (a.group) groupNames.set(a.group.id, a.group.name);
+                                });
+                                return (
+                                  <>
+                                    {Array.from(grouped.entries()).map(([gId, attrs]) => (
+                                      <SelectGroup key={gId}>
+                                        <SelectLabel className="text-xs font-bold text-amber-600">
+                                          {groupNames.get(gId)}
+                                        </SelectLabel>
+                                        {attrs.map((a) => (
+                                          <SelectItem key={a.id} value={a.id}>
+                                            {a.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    ))}
+                                    {ungrouped.length > 0 && (
+                                      <SelectGroup>
+                                        {grouped.size > 0 && (
+                                          <SelectLabel className="text-xs text-muted-foreground">
+                                            Без группы
+                                          </SelectLabel>
+                                        )}
+                                        {ungrouped.map((a) => (
+                                          <SelectItem key={a.id} value={a.id}>
+                                            {a.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </SelectContent>
                           </Select>
                           <div className="flex-1 relative">

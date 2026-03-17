@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Truck, Shield, RotateCcw, Phone, ChevronRight, MapPin, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Container } from "@/components/shared/container";
@@ -36,6 +36,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
+
+  // Для старых числовых ID не генерируем мета — будет редирект
+  if (/^\d+$/.test(slug)) return { title: "Перенаправление..." };
+
   const product = await prisma.product.findUnique({
     where: { slug },
     select: {
@@ -76,13 +80,26 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // 301 redirect: старые URL вида /product/123 → /product/[slug]
+  if (/^\d+$/.test(slug)) {
+    const oldProduct = await prisma.product.findUnique({
+      where: { oldId: parseInt(slug, 10) },
+      select: { slug: true },
+    });
+    if (oldProduct) {
+      redirect(`/product/${oldProduct.slug}`);
+    }
+    notFound();
+  }
+
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
       category: { select: { name: true, slug: true } },
       images: { orderBy: { position: "asc" } },
       attributes: {
-        include: { attribute: true },
+        include: { attribute: { include: { group: true } } },
         orderBy: { attribute: { sortOrder: "asc" } },
       },
     },
@@ -339,36 +356,79 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
 
             {/* Attributes / Specs inline */}
-            {(product.attributes.length > 0 || product.code) && (
-              <div className="mt-4 rounded-2xl bg-white border border-neutral-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-neutral-100">
-                  <h3 className="text-sm font-bold text-neutral-900">Характеристики</h3>
-                </div>
-                <div className="divide-y divide-neutral-50">
-                  {product.code && (
+            {(product.attributes.length > 0 || product.code) && (() => {
+              // Build a map of key → value for dimension combining
+              const attrMap = new Map(
+                product.attributes.map((pa) => [pa.attribute.key, pa])
+              );
+
+              // Define dimension combos: [groupId prefix, label, keys[], unit]
+              const dimensionCombos: { keys: string[]; label: string; unit: string }[] = [
+                { keys: ["prof_height", "prof_width", "thickness"], label: "Размер", unit: "мм" },
+                { keys: ["ugol_a", "ugol_b", "thickness"], label: "Размер", unit: "мм" },
+                { keys: ["beam_flange", "beam_number"], label: "Размер", unit: "мм" },
+                { keys: ["diameter", "thickness"], label: "Размер", unit: "мм" },
+                { keys: ["width", "length", "thickness"], label: "Размер", unit: "мм" },
+              ];
+
+              // Find first matching combo where at least 2 keys have values
+              let comboRow: { label: string; value: string; unit: string } | null = null;
+              const hiddenKeys = new Set<string>();
+
+              for (const combo of dimensionCombos) {
+                const vals = combo.keys.map((k) => attrMap.get(k)?.value).filter(Boolean) as string[];
+                if (vals.length >= 2) {
+                  comboRow = { label: combo.label, value: vals.join("х"), unit: combo.unit };
+                  combo.keys.forEach((k) => { if (attrMap.has(k)) hiddenKeys.add(k); });
+                  break;
+                }
+              }
+
+              // Filter out hidden attributes (already shown in combo row)
+              const visibleAttrs = product.attributes.filter(
+                (pa) => !hiddenKeys.has(pa.attribute.key)
+              );
+
+              return (
+                <div className="mt-4 rounded-2xl bg-white border border-neutral-200 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">Характеристики</h3>
+                  </div>
+                  <div className="divide-y divide-neutral-50">
+                    {product.code && (
+                      <div className="flex items-center justify-between px-6 py-3">
+                        <span className="text-sm text-neutral-500">Артикул</span>
+                        <span className="text-sm font-medium text-neutral-900">{product.code}</span>
+                      </div>
+                    )}
+                    {comboRow && (
+                      <div className="flex items-center justify-between px-6 py-3">
+                        <span className="text-sm text-neutral-500">{comboRow.label}</span>
+                        <span className="text-sm font-bold text-neutral-900">
+                          {comboRow.value}
+                          <span className="ml-1 font-medium text-neutral-400">{comboRow.unit}</span>
+                        </span>
+                      </div>
+                    )}
+                    {visibleAttrs.map((pa) => (
+                      <div key={pa.id} className="flex items-center justify-between px-6 py-3">
+                        <span className="text-sm text-neutral-500">{pa.attribute.name}</span>
+                        <span className="text-sm font-medium text-neutral-900">
+                          {pa.value}
+                          {pa.attribute.unit && (
+                            <span className="ml-1 text-neutral-400">{pa.attribute.unit}</span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
                     <div className="flex items-center justify-between px-6 py-3">
-                      <span className="text-sm text-neutral-500">Артикул</span>
-                      <span className="text-sm font-medium text-neutral-900">{product.code}</span>
+                      <span className="text-sm text-neutral-500">Единица измерения</span>
+                      <span className="text-sm font-medium text-neutral-900">{unit}</span>
                     </div>
-                  )}
-                  {product.attributes.map((pa) => (
-                    <div key={pa.id} className="flex items-center justify-between px-6 py-3">
-                      <span className="text-sm text-neutral-500">{pa.attribute.name}</span>
-                      <span className="text-sm font-medium text-neutral-900">
-                        {pa.value}
-                        {pa.attribute.unit && (
-                          <span className="ml-1 text-neutral-400">{pa.attribute.unit}</span>
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="flex items-center justify-between px-6 py-3">
-                    <span className="text-sm text-neutral-500">Единица измерения</span>
-                    <span className="text-sm font-medium text-neutral-900">{unit}</span>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
 

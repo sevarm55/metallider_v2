@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const attributes = await prisma.attribute.findMany({
-      orderBy: { sortOrder: "asc" },
+      orderBy: [{ group: { sortOrder: "asc" } }, { sortOrder: "asc" }],
       select: {
         id: true,
         name: true,
@@ -18,6 +18,8 @@ export async function GET() {
         unit: true,
         sortOrder: true,
         isFilter: true,
+        groupId: true,
+        group: { select: { id: true, name: true } },
         _count: { select: { values: true } },
       },
     });
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, key, type, unit, sortOrder, isFilter } = body;
+    const { name, key, type, unit, sortOrder, isFilter, groupId } = body;
 
     if (!name?.trim() || !key?.trim()) {
       return apiError("Название и ключ обязательны", 400, "VALIDATION_ERROR");
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
         unit: unit?.trim() || null,
         sortOrder: sortOrder ?? 0,
         isFilter: isFilter ?? true,
+        groupId: groupId || null,
       },
     });
 

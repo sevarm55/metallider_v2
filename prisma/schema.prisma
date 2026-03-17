@@ -68,6 +68,7 @@ model Product {
   orderItems OrderItem[]
   cartItems  CartItem[]
 
+  oldId      Int?    @unique // ID из старого сайта для 301 редиректов
   moyskladId String? @unique // ID из МойСклад для синхронизации
 
   createdAt DateTime @default(now())
@@ -113,6 +114,16 @@ enum AttributeType {
   COLOR  // цвет RAL
 }
 
+// Группы атрибутов (Трубы, Листы, Арматура...)
+model AttributeGroup {
+  id         String      @id @default(cuid())
+  name       String      // "Трубы", "Листы", "Общие"
+  sortOrder  Int         @default(0)
+  attributes Attribute[]
+
+  @@map("attribute_groups")
+}
+
 // Справочник атрибутов (Диаметр, Толщина стенки, Цвет RAL...)
 model Attribute {
   id        String        @id @default(cuid())
@@ -122,8 +133,11 @@ model Attribute {
   unit      String?       // "мм", "м", "кг"
   sortOrder Int           @default(0)
   isFilter  Boolean       @default(true) // показывать в фильтрах
+  groupId   String?
+  group     AttributeGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
   values    ProductAttribute[]
 
+  @@index([groupId])
   @@map("attributes")
 }
 
