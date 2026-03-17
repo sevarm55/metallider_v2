@@ -22,9 +22,6 @@ const nextConfig: NextConfig = {
       // /categories → /catalog
       { source: "/categories", destination: "/catalog", permanent: true },
 
-      // /login → /admin/login
-      { source: "/login", destination: "/admin/login", permanent: true },
-
       // /adminpanel/:path* → /admin/:path*
       { source: "/adminpanel", destination: "/admin", permanent: true },
       { source: "/adminpanel/:path*", destination: "/admin/:path*", permanent: true },
