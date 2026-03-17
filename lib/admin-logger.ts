@@ -23,7 +23,10 @@ export type AdminAction =
   | "UPDATE_ATTRIBUTE_GROUP"
   | "DELETE_ATTRIBUTE_GROUP"
   | "SYNC_MOYSKLAD_STOCK"
-  | "BULK_ADD_IMAGE";
+  | "BULK_ADD_IMAGE"
+  | "CREATE_ARTICLE"
+  | "UPDATE_ARTICLE"
+  | "DELETE_ARTICLE";
 
 interface LogAdminActionParams {
   userId: string;

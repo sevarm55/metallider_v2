@@ -31,6 +31,7 @@ const navLinks = [
   { label: "Доставка", href: "/delivery" },
   { label: "Оплата", href: "/payment" },
   { label: "О компании", href: "/about" },
+  { label: "Блог", href: "/blog" },
   { label: "Контакты", href: "/contacts" },
 ];
 

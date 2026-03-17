@@ -14,6 +14,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
@@ -25,6 +26,7 @@ const navItems = [
   { label: "Заказы", href: "/admin/orders", icon: ShoppingCart },
   { label: "Категории", href: "/admin/categories", icon: FolderTree },
   { label: "Характеристики", href: "/admin/attributes", icon: SlidersHorizontal },
+  { label: "Блог", href: "/admin/blog", icon: BookOpen },
   { label: "Пользователи", href: "/admin/users", icon: Users },
   { label: "Логи", href: "/admin/logs", icon: ScrollText },
   { label: "Настройки", href: "/admin/settings", icon: Settings },

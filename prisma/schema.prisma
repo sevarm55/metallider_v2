@@ -318,6 +318,23 @@ model AdminLog {
   @@map("admin_logs")
 }
 
+// ─── Блог ─────────────────────────────────────────────
+
+model Article {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  excerpt   String?  // Краткое описание для карточки и SEO
+  image     String?  // Обложка
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("articles")
+}
+
 // ─── Заявки на обратный звонок / быстрый заказ ───────
 
 model CallbackRequest {

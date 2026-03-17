@@ -34,6 +34,7 @@ const navLinks = [
   { label: "Доставка", href: "/delivery" },
   { label: "Оплата", href: "/payment" },
   { label: "О компании", href: "/about" },
+  { label: "Блог", href: "/blog" },
   { label: "Контакты", href: "/contacts" },
 ];
 
@@ -387,13 +388,10 @@ export function HeaderClassic() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group relative flex items-center gap-2 px-5 py-3 text-sm font-semibold text-neutral-600 hover:text-neutral-900 transition-colors"
+                className="group relative flex items-center px-4 py-3 text-sm font-semibold text-neutral-600 hover:text-neutral-900 transition-colors"
               >
-                <span className="text-[9px] font-black text-neutral-300 font-(family-name:--font-unbounded) transition-colors group-hover:text-primary">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
                 {link.label}
-                <span className="absolute bottom-0 left-5 right-5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </Link>
             ))}
 

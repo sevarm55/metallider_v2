@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { Phone, Mail, MapPin, Clock, Send, Navigation, MessageCircle } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";

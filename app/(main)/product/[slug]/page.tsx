@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 import Link from "next/link";
 import { Truck, Shield, RotateCcw, Phone, ChevronRight, MapPin, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Container } from "@/components/shared/container";
@@ -443,9 +444,11 @@ export default async function ProductPage({ params }: PageProps) {
               <div
                 className="prose prose-sm max-w-none text-neutral-600 prose-headings:text-neutral-900 prose-strong:text-neutral-900"
                 dangerouslySetInnerHTML={{
-                  __html:
+                  __html: sanitizeHtml(
                     product.description ||
                     `<p>${product.name} — сертифицированная металлопродукция от проверенных производителей. Подходит для строительных, промышленных и бытовых задач. Соответствует стандартам ГОСТ.</p>`,
+                    { allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]) }
+                  ),
                 }}
               />
             </div>

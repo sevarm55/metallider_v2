@@ -71,8 +71,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate 6-digit verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate 6-digit verification code (cryptographically secure)
+    const { randomInt } = await import("crypto");
+    const code = randomInt(100000, 1000000).toString();
 
     await prisma.verificationCode.create({
       data: {

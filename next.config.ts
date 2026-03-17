@@ -27,8 +27,6 @@ const nextConfig: NextConfig = {
       { source: "/adminpanel/:path*", destination: "/admin/:path*", permanent: true },
 
       // Удалённые страницы → главная
-      { source: "/blog", destination: "/", permanent: true },
-      { source: "/blog/:slug*", destination: "/", permanent: true },
       { source: "/cities", destination: "/", permanent: true },
       { source: "/cities/:city*", destination: "/", permanent: true },
       { source: "/faq", destination: "/", permanent: true },

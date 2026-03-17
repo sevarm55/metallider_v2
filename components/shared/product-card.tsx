@@ -39,13 +39,10 @@ import { toast } from "sonner";
 
 
 interface ProductAttribute {
-
+  key?: string;
   name: string;
-
   value: string;
-
   unit?: string | null;
-
 }
 
 
@@ -434,30 +431,41 @@ export function ProductCard({
 
 
           {/* Attributes as chips */}
+          {attributes && attributes.length > 0 && (() => {
+            const attrMap = new Map(attributes.map((a) => [a.key, a]));
+            const dimensionCombos = [
+              ["prof_height", "prof_width"],
+              ["ugol_a", "ugol_b"],
+              ["beam_flange", "beam_number"],
+              ["width", "length"],
+            ];
+            let sizeChip: { label: string; value: string } | null = null;
+            const hiddenKeys = new Set<string>();
+            for (const combo of dimensionCombos) {
+              const vals = combo.map((k) => attrMap.get(k)?.value).filter(Boolean) as string[];
+              if (vals.length >= 2) {
+                sizeChip = { label: "Размер", value: vals.join("х") + " мм" };
+                combo.forEach((k) => { if (attrMap.has(k)) hiddenKeys.add(k); });
+                break;
+              }
+            }
+            const visible = attributes.filter((a) => !hiddenKeys.has(a.key || ""));
+            const chips: { label: string; value: string }[] = [];
+            if (sizeChip) chips.push(sizeChip);
+            visible.slice(0, sizeChip ? 2 : 3).forEach((a) => {
+              chips.push({ label: a.name, value: `${a.value}${a.unit ? ` ${a.unit}` : ""}` });
+            });
 
-          {attributes && attributes.length > 0 && (
-
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
-
-              {attributes.slice(0, 3).map((a, i) => (
-
-                <span
-
-                  key={i}
-
-                  className="rounded-md bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-neutral-500"
-
-                >
-
-                  {a.name}: <span className="font-semibold text-neutral-700">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
-
-                </span>
-
-              ))}
-
-            </div>
-
-          )}
+            return chips.length > 0 ? (
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {chips.map((c, i) => (
+                  <span key={i} className="rounded-md bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-neutral-500">
+                    {c.label}: <span className="font-semibold text-neutral-700">{c.value}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null;
+          })()}
 
 
 

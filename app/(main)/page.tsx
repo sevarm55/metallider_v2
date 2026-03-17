@@ -94,6 +94,7 @@ export default async function HomePage() {
     isNew: p.isNew,
     images: p.images.map((img) => img.url),
     attributes: p.attributes.map((a) => ({
+      key: a.attribute.key,
       name: a.attribute.name,
       value: a.value,
       unit: a.attribute.unit,

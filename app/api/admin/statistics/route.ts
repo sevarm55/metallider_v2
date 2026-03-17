@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma-client";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
+import { getAdminUserId } from "@/lib/get-admin-user-id";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const adminUserId = await getAdminUserId();
+    if (!adminUserId) return apiError("Не авторизован", 401, "UNAUTHORIZED");
     const [
       totalProducts,
       activeProducts,

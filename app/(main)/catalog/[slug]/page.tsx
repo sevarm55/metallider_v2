@@ -143,9 +143,11 @@ export default async function CategoryPage({ params }: PageProps) {
     images: p.images.map((img) => img.url),
     categoryId: p.categoryId || "",
     attributes: p.attributes.map((a) => ({
+      key: a.attribute.key,
       name: a.attribute.name,
       value: a.value,
       unit: a.attribute.unit,
+      isFilter: a.attribute.isFilter,
     })),
   }));
 

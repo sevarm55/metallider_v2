@@ -2,12 +2,15 @@ import { NextRequest } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
+import { getAdminUserId } from "@/lib/get-admin-user-id";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(request: NextRequest) {
   try {
+    const adminUserId = await getAdminUserId();
+    if (!adminUserId) return apiError("Не авторизован", 401, "UNAUTHORIZED");
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 

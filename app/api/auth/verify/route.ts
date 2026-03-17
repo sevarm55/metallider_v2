@@ -2,10 +2,14 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma-client";
 import { verifyCodeSchema } from "@/lib/auth-schemas";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = checkRateLimit(request, "verify");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const parsed = verifyCodeSchema.safeParse(body);
@@ -25,17 +29,11 @@ export async function POST(request: NextRequest) {
       return apiError("Неверный код подтверждения", 400, "INVALID_CODE");
     }
 
-    // Check TTL
+    // Удалить код если старше 15 минут (защита от перебора старых кодов)
     const codeAge = Date.now() - verificationCode.createdAt.getTime();
     if (codeAge > CODE_TTL_MS) {
-      await prisma.verificationCode.delete({
-        where: { id: verificationCode.id },
-      });
-      return apiError(
-        "Код подтверждения истёк. Зарегистрируйтесь повторно.",
-        400,
-        "CODE_EXPIRED",
-      );
+      await prisma.verificationCode.delete({ where: { id: verificationCode.id } });
+      return apiError("Код подтверждения истёк. Запросите новый.", 400, "CODE_EXPIRED");
     }
 
     // Verify user and delete code

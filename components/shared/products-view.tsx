@@ -33,7 +33,7 @@ interface Product {
   image?: string | null;
   images?: string[];
   category?: string;
-  attributes?: { name: string; value: string; unit?: string | null }[];
+  attributes?: { key?: string; name: string; value: string; unit?: string | null; isFilter?: boolean }[];
 }
 
 interface ProductsViewProps {

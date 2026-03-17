@@ -4,12 +4,16 @@ import { prisma } from "@/lib/prisma-client";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://metallider.ru";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products] = await Promise.all([
+  const [categories, products, articles] = await Promise.all([
     prisma.category.findMany({
       where: { isActive: true },
       select: { slug: true, updatedAt: true },
     }),
     prisma.product.findMany({
+      where: { isActive: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    prisma.article.findMany({
       where: { isActive: true },
       select: { slug: true, updatedAt: true },
     }),
@@ -74,5 +78,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...categoryPages, ...productPages];
+  const blogPages: MetadataRoute.Sitemap = [
+    ...(articles.length > 0
+      ? [
+          {
+            url: `${SITE_URL}/blog`,
+            lastModified: new Date(),
+            changeFrequency: "weekly" as const,
+            priority: 0.7,
+          },
+        ]
+      : []),
+    ...articles.map((a) => ({
+      url: `${SITE_URL}/blog/${a.slug}`,
+      lastModified: a.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ];
+
+  return [...staticPages, ...categoryPages, ...productPages, ...blogPages];
 }

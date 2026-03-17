@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RichEditor } from "@/components/ui/rich-editor";
+import { CodeAutocomplete, type MoyskladItem } from "@/components/ui/code-autocomplete";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -454,10 +455,33 @@ export default function EditProductPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="code">Артикул</Label>
-                    <Input
-                      id="code"
-                      placeholder="ТП-40-20-2"
-                      {...register("code")}
+                    <Controller
+                      name="code"
+                      control={control}
+                      render={({ field }) => (
+                        <CodeAutocomplete
+                          id="code"
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          onSelect={(item: MoyskladItem) => {
+                            if (item.price > 0) setValue("price", item.price);
+                            // Set weight in attributes if exists
+                            const weightAttr = availableAttributes.find((a) => a.key === "weight_pm");
+                            if (weightAttr && item.weight > 0) {
+                              const existing = productAttributes.findIndex((pa) => pa.attributeId === weightAttr.id);
+                              if (existing >= 0) {
+                                updateAttribute(existing, "value", String(item.weight));
+                              } else {
+                                setProductAttributes((prev) => [
+                                  ...prev,
+                                  { attributeId: weightAttr.id, value: String(item.weight), numericValue: item.weight },
+                                ]);
+                              }
+                            }
+                          }}
+                          placeholder="Введите код — поиск по МойСклад"
+                        />
+                      )}
                     />
                   </div>
                 </div>
