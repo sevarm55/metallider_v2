@@ -52,7 +52,7 @@ export default async function ArticlePage({ params }: PageProps) {
   });
 
   const sanitizedContent = sanitizeHtml(article.content, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "h3"]),
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "h3", "table", "thead", "tbody", "tr", "th", "td", "colgroup", "col"]),
     allowedAttributes: {
       ...sanitizeHtml.defaults.allowedAttributes,
       img: ["src", "alt", "width", "height", "loading"],

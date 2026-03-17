@@ -447,7 +447,7 @@ export default async function ProductPage({ params }: PageProps) {
                   __html: sanitizeHtml(
                     product.description ||
                     `<p>${product.name} — сертифицированная металлопродукция от проверенных производителей. Подходит для строительных, промышленных и бытовых задач. Соответствует стандартам ГОСТ.</p>`,
-                    { allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]) }
+                    { allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "table", "thead", "tbody", "tr", "th", "td", "colgroup", "col"]) }
                   ),
                 }}
               />

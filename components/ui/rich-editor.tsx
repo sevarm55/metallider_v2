@@ -5,6 +5,10 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import {
   Bold,
   Italic,
@@ -18,6 +22,8 @@ import {
   Minus,
   Undo,
   Redo,
+  Table as TableIcon,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +44,10 @@ export function RichEditor({ value, onChange, placeholder = "Начните пи
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content: value || "",
     onUpdate: ({ editor }) => {
@@ -51,6 +61,8 @@ export function RichEditor({ value, onChange, placeholder = "Начните пи
   });
 
   if (!editor) return null;
+
+  const isInTable = editor.isActive("table");
 
   return (
     <div className={cn("rounded-lg border bg-white overflow-hidden", className)}>
@@ -131,6 +143,40 @@ export function RichEditor({ value, onChange, placeholder = "Начните пи
 
         <ToolbarSep />
 
+        {/* Table buttons */}
+        <ToolbarButton
+          active={isInTable}
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 4, withHeaderRow: true }).run()}
+          title="Вставить таблицу"
+        >
+          <TableIcon className="h-4 w-4" />
+        </ToolbarButton>
+
+        {isInTable && (
+          <>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              title="Добавить столбец"
+            >
+              <span className="text-[10px] font-bold">+С</span>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              title="Добавить строку"
+            >
+              <span className="text-[10px] font-bold">+Р</span>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              title="Удалить таблицу"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-red-500" />
+            </ToolbarButton>
+          </>
+        )}
+
+        <ToolbarSep />
+
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           title="Разделитель"
@@ -158,6 +204,39 @@ export function RichEditor({ value, onChange, placeholder = "Начните пи
 
       {/* Editor */}
       <EditorContent editor={editor} />
+
+      {/* Table styles */}
+      <style jsx global>{`
+        .ProseMirror table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1em 0;
+        }
+        .ProseMirror th,
+        .ProseMirror td {
+          border: 1px solid #d1d5db;
+          padding: 0.5em 0.75em;
+          text-align: left;
+          vertical-align: top;
+          min-width: 80px;
+        }
+        .ProseMirror th {
+          background: #f9fafb;
+          font-weight: 600;
+        }
+        .ProseMirror .selectedCell {
+          background: rgb(var(--color-primary) / 0.1);
+        }
+        .ProseMirror .column-resize-handle {
+          position: absolute;
+          right: -2px;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: rgb(var(--color-primary));
+          cursor: col-resize;
+        }
+      `}</style>
     </div>
   );
 }
