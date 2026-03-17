@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const { id } = await params;
     const body = await request.json();
-    const { name, key, type, unit, sortOrder, isFilter } = body;
+    const { name, key, type, unit, sortOrder, isFilter, groupId } = body;
 
     if (!name?.trim()) {
       return apiError("Название обязательно", 400, "VALIDATION_ERROR");
@@ -33,6 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         unit: unit?.trim() || null,
         sortOrder: sortOrder ?? 0,
         isFilter: isFilter ?? true,
+        groupId: groupId !== undefined ? (groupId || null) : undefined,
       },
     });
 
