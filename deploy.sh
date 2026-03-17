@@ -4,6 +4,10 @@
 
 set -e
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+export PATH="$HOME/.bun/bin:$PATH"
+
 APP_DIR="/var/www/metallider_v2"
 APP_NAME="metall-v2"
 
