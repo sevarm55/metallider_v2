@@ -19,7 +19,7 @@ echo ">> git pull..."
 git pull origin main
 
 echo ">> npm install..."
-npm install --production=false
+npm install --legacy-peer-deps
 
 echo ">> prisma generate..."
 npx prisma generate
