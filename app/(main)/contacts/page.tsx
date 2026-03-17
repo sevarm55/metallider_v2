@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Send, Navigation, MessageCircle, Building2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, Navigation, MessageCircle } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,14 +50,6 @@ const contactCards = [
   },
 ];
 
-const requisites = [
-  { label: "Название", value: "ООО «МеталлЛидер»" },
-  { label: "ИНН", value: "7712345678" },
-  { label: "КПП", value: "771201001" },
-  { label: "ОГРН", value: "1177746123456" },
-  { label: "Юридический адрес", value: "г. Москва, ул. Примерная, д. 1" },
-  { label: "Расчётный счёт", value: "40702810123450001234" },
-];
 
 export default function ContactsPage() {
   return (
@@ -123,141 +115,170 @@ export default function ContactsPage() {
         </Container>
       </section>
 
-      {/* ── Immersive map with side panel ── */}
-      <section className="relative overflow-hidden bg-neutral-50">
-        <div className="relative min-h-[550px] lg:min-h-[650px]">
-          {/* Map fills entire background */}
-          <iframe
-            src="https://yandex.ru/map-widget/v1/?text=Металлидер+Реутов+Автомагистраль+Москва+Нижний+Новгород+1&z=15&l=map"
-            width="100%"
-            height="100%"
-            style={{ border: 0, display: "block" }}
-            allowFullScreen
-            loading="lazy"
-            className="absolute inset-0 h-full w-full"
-          />
+      {/* ── Map + side panel ── */}
+      <section className="bg-neutral-50">
+        <div className="relative flex flex-col lg:block">
+          {/* Map — full on desktop, fixed height on mobile */}
+          <div className="relative h-[400px] lg:h-[650px] lg:min-h-[650px]">
+            <iframe
+              src="https://yandex.ru/map-widget/v1/?text=Металлидер+Реутов+Автомагистраль+Москва+Нижний+Новгород+1&z=15&l=map"
+              width="100%"
+              height="100%"
+              style={{ border: 0, display: "block" }}
+              allowFullScreen
+              loading="lazy"
+              className="absolute inset-0 h-full w-full"
+            />
 
-          {/* Gradient overlays for depth */}
-          <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-neutral-50/95 via-neutral-50/50 to-transparent lg:via-neutral-50/30" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-neutral-50/60 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-neutral-50/60 to-transparent" />
+            {/* Gradient overlays — only on desktop */}
+            <div className="pointer-events-none absolute inset-0 hidden lg:block bg-linear-to-r from-neutral-50/95 via-neutral-50/30 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 hidden lg:block bg-linear-to-b from-neutral-50/60 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 hidden lg:block bg-linear-to-t from-neutral-50/60 to-transparent" />
 
-          {/* Floating side panel */}
-          <div className="pointer-events-none relative z-10 flex h-full min-h-[550px] lg:min-h-[650px] items-center">
-            <Container>
-              <div className="max-w-sm lg:max-w-md">
-                <div className="pointer-events-auto rounded-3xl bg-white/80 backdrop-blur-2xl p-7 lg:p-9 ring-1 ring-neutral-200 shadow-2xl shadow-neutral-200/40">
-                  {/* Decorative glow */}
-                  <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+            {/* Floating side panel — desktop only */}
+            <div className="pointer-events-none absolute inset-0 z-10 hidden lg:flex items-center">
+              <Container>
+                <div className="max-w-md">
+                  <div className="pointer-events-auto rounded-3xl bg-white/80 backdrop-blur-2xl p-9 ring-1 ring-neutral-200 shadow-2xl shadow-neutral-200/40">
+                    <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
 
-                  {/* Pin icon with pulse */}
-                  <div className="relative mb-6 inline-flex">
-                    <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-ping" style={{ animationDuration: "2s" }} />
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-orange-600 shadow-lg shadow-primary/30">
-                      <MapPin className="h-7 w-7 text-white" />
-                    </div>
-                  </div>
-
-                  <h2 className="text-2xl font-extrabold text-neutral-900 lg:text-3xl font-(family-name:--font-unbounded)">
-                    Приезжайте к нам
-                  </h2>
-                  <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
-                    {contactInfo.warehouse} — удобный подъезд и бесплатная парковка
-                  </p>
-
-                  {/* Info rows */}
-                  <div className="mt-6 space-y-3">
-                    <a href={contactInfo.mapUrl} target="_blank" className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100 hover:ring-primary/20 transition-all group">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                        <MapPin className="h-4 w-4 text-emerald-400" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Адрес</p>
-                        <p className="text-sm font-semibold text-neutral-900 truncate group-hover:text-primary transition-colors">{contactInfo.address}</p>
-                      </div>
-                    </a>
-
-                    <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                        <Clock className="h-4 w-4 text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Режим работы</p>
-                        <p className="text-sm font-semibold text-neutral-900">{contactInfo.workingHours}</p>
+                    <div className="relative mb-6 inline-flex">
+                      <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-ping" style={{ animationDuration: "2s" }} />
+                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-orange-600 shadow-lg shadow-primary/30">
+                        <MapPin className="h-7 w-7 text-white" />
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
-                        <Navigation className="h-4 w-4 text-violet-400" />
+                    <h2 className="text-3xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded)">
+                      Приезжайте к нам
+                    </h2>
+                    <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
+                      {contactInfo.warehouse} — удобный подъезд и бесплатная парковка
+                    </p>
+
+                    <div className="mt-6 space-y-3">
+                      <a href={contactInfo.mapUrl} target="_blank" className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100 hover:ring-primary/20 transition-all group">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                          <MapPin className="h-4 w-4 text-emerald-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Адрес</p>
+                          <p className="text-sm font-semibold text-neutral-900 truncate group-hover:text-primary transition-colors">{contactInfo.address}</p>
+                        </div>
+                      </a>
+                      <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                          <Clock className="h-4 w-4 text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Режим работы</p>
+                          <p className="text-sm font-semibold text-neutral-900">{contactInfo.workingHours}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] text-neutral-500 uppercase tracking-wide">На автомобиле</p>
-                        <p className="text-sm font-semibold text-neutral-900">Бесплатная парковка</p>
+                      <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                          <Navigation className="h-4 w-4 text-violet-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-wide">На автомобиле</p>
+                          <p className="text-sm font-semibold text-neutral-900">Бесплатная парковка</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Messengers */}
-                  <div className="mt-5 flex gap-2">
-                    <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
-                      <Send className="h-3.5 w-3.5" />
-                      Telegram
-                    </a>
-                    <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      WhatsApp
-                    </a>
-                  </div>
+                    <div className="mt-5 flex gap-2">
+                      <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                        <Send className="h-3.5 w-3.5" />
+                        Telegram
+                      </a>
+                      <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        WhatsApp
+                      </a>
+                    </div>
 
-                  {/* CTA */}
-                  <Button asChild size="lg" className="mt-5 w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-base">
-                    <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
-                      <Phone className="h-5 w-5" />
-                      {contactInfo.phone}
-                    </a>
-                  </Button>
+                    <Button asChild size="lg" className="mt-5 w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-base">
+                      <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
+                        <Phone className="h-5 w-5" />
+                        {contactInfo.phone}
+                      </a>
+                    </Button>
+                  </div>
                 </div>
+              </Container>
+            </div>
+          </div>
+
+          {/* Info panel — mobile only, below map */}
+          <div className="lg:hidden">
+            <Container className="py-6">
+              <div className="rounded-2xl bg-white p-6 ring-1 ring-neutral-200 shadow-lg">
+                <div className="relative mb-4 inline-flex">
+                  <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary to-orange-600 shadow-lg shadow-primary/30">
+                    <MapPin className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+
+                <h2 className="text-xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded)">
+                  Приезжайте к нам
+                </h2>
+                <p className="mt-1 text-sm text-neutral-400">
+                  {contactInfo.warehouse} — удобный подъезд и бесплатная парковка
+                </p>
+
+                <div className="mt-4 space-y-2.5">
+                  <a href={contactInfo.mapUrl} target="_blank" className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100 group">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                      <MapPin className="h-4 w-4 text-emerald-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Адрес</p>
+                      <p className="text-sm font-semibold text-neutral-900 group-hover:text-primary transition-colors">{contactInfo.address}</p>
+                    </div>
+                  </a>
+                  <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                      <Clock className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wide">Режим работы</p>
+                      <p className="text-sm font-semibold text-neutral-900">{contactInfo.workingHours}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 ring-1 ring-neutral-100">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                      <Navigation className="h-4 w-4 text-violet-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wide">На автомобиле</p>
+                      <p className="text-sm font-semibold text-neutral-900">Бесплатная парковка</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                    <Send className="h-3.5 w-3.5" />
+                    Telegram
+                  </a>
+                  <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    WhatsApp
+                  </a>
+                </div>
+
+                <Button asChild size="lg" className="mt-4 w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-base">
+                  <a href={`tel:${contactInfo.phoneRaw}`} className="gap-2">
+                    <Phone className="h-5 w-5" />
+                    {contactInfo.phone}
+                  </a>
+                </Button>
               </div>
             </Container>
           </div>
         </div>
       </section>
 
-      {/* ── Requisites ── */}
-      <section className="py-12 lg:py-16">
-        <Container>
-          <div className="relative overflow-hidden rounded-2xl bg-white p-8 lg:p-10">
-            <span className="pointer-events-none absolute -right-4 -top-6 select-none text-[8rem] font-black leading-none text-neutral-100 font-(family-name:--font-unbounded)">
-              ИНН
-            </span>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(var(--color-primary),0.06),transparent_50%)]" />
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-orange-600 shadow-lg">
-                  <Building2 className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-extrabold text-neutral-900 font-(family-name:--font-unbounded)">
-                    Реквизиты
-                  </h2>
-                  <p className="text-sm text-neutral-400">Юридическая информация о компании</p>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {requisites.map((r) => (
-                  <div key={r.label} className="rounded-xl bg-neutral-50 border border-neutral-200 p-4">
-                    <p className="text-xs text-neutral-500 uppercase tracking-wide mb-1">{r.label}</p>
-                    <p className="text-sm font-semibold text-neutral-900">{r.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
     </>
   );
 }
