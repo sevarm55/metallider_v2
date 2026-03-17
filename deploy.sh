@@ -16,6 +16,7 @@ echo "=== Deploy started ==="
 cd "$APP_DIR"
 
 echo ">> git pull..."
+git checkout -- bun.lock 2>/dev/null || true
 git pull origin main
 
 echo ">> bun install..."
