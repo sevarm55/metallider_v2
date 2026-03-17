@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "ssh promax@93.183.80.122 'cd /var/www/metallider_v2 && bash deploy.sh'"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
