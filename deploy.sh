@@ -18,14 +18,14 @@ cd "$APP_DIR"
 echo ">> git pull..."
 git pull origin main
 
-echo ">> npm install..."
-npm install --legacy-peer-deps
+echo ">> bun install..."
+bun install
 
 echo ">> prisma generate..."
-npx prisma generate
+bunx prisma generate
 
-echo ">> npm run build..."
-npm run build
+echo ">> build..."
+bun run build
 
 echo ">> pm2 restart..."
 pm2 restart "$APP_NAME"
