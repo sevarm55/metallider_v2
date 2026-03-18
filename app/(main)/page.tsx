@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Image from "next/image";
 import Link from "next/link";
-import { Truck, Shield, BadgePercent, Headset, ArrowRight, MapPin, Clock, Phone } from "lucide-react";
+import { Truck, Shield, BadgePercent, Headset, ArrowRight, MapPin, Clock, Phone, BookOpen, Calendar, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
 import { HeroBento } from "@/components/shared/hero-bento";
@@ -46,7 +46,7 @@ const advantages = [
 
 
 export default async function HomePage() {
-  const [dbCategories, dbProducts] = await Promise.all([
+  const [dbCategories, dbProducts, articles] = await Promise.all([
     prisma.category.findMany({
       where: { isActive: true, parentId: null },
       orderBy: { sortOrder: "asc" },
@@ -79,6 +79,12 @@ export default async function HomePage() {
       },
       orderBy: { createdAt: "desc" },
       take: 8,
+    }),
+    prisma.article.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+      select: { title: true, slug: true, excerpt: true, image: true, createdAt: true },
     }),
   ]);
 
@@ -214,8 +220,8 @@ export default async function HomePage() {
                     Популярные товары
                   </h2>
                 </div>
-                <Button variant="ghost" asChild className="hidden sm:flex">
-                  <Link href="/catalog" className="gap-1 text-primary hover:text-primary/80">
+                <Button variant="outline" asChild className="hidden sm:flex">
+                  <Link href="/catalog" className="gap-1">
                     Все товары <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -226,6 +232,83 @@ export default async function HomePage() {
                 <ProductCard key={product.id} {...product} />
               ))}
             </div>
+          </Container>
+        </section>
+      )}
+
+      {/* Blog */}
+      {articles.length > 0 && (
+        <section className="py-12 lg:py-16">
+          <Container>
+            <div className="relative mb-10 overflow-hidden">
+              <span className="pointer-events-none absolute top-0 left-0 select-none text-[clamp(4rem,10vw,8rem)] font-extrabold uppercase leading-none text-neutral-200/60 font-(family-name:--font-unbounded)">
+                БЛОГ
+              </span>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <span className="block h-7 w-1 rounded-full bg-orange-500" />
+                    <span className="text-sm font-bold uppercase tracking-widest text-orange-500">
+                      Статьи
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-neutral-900 md:text-4xl lg:text-5xl font-(family-name:--font-unbounded)">
+                    Полезные статьи
+                  </h2>
+                </div>
+                <Button variant="outline" asChild className="hidden sm:flex">
+                  <Link href="/blog" className="gap-1">
+                    Все статьи <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {articles.map((article) => (
+                <Link
+                  key={article.slug}
+                  href={`/blog/${article.slug}`}
+                  className="group rounded-2xl bg-white border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-300"
+                >
+                  {article.image ? (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-neutral-100 flex items-center justify-center">
+                      <BookOpen className="h-8 w-8 text-neutral-200" />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 mb-2">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(article.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                    </div>
+                    <h3 className="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
+                    {article.excerpt && (
+                      <p className="mt-1.5 text-xs text-neutral-500 line-clamp-2">{article.excerpt}</p>
+                    )}
+                    <span className="mt-2 inline-flex items-center gap-0.5 text-xs font-medium text-primary">
+                      Читать <ChevronRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              href="/blog"
+              className="mt-6 sm:hidden flex items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-5 py-3 text-sm font-semibold text-neutral-700"
+            >
+              Все статьи <ArrowRight className="h-4 w-4" />
+            </Link>
           </Container>
         </section>
       )}
@@ -428,6 +511,7 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
     </>
   );
 }

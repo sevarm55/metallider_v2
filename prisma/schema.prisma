@@ -335,6 +335,20 @@ model Article {
   @@map("articles")
 }
 
+// ─── Отзывы / Пожелания ──────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  text      String   @db.Text
+  rating    Int      @default(5)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([isVisible])
+  @@map("reviews")
+}
+
 // ─── Заявки на обратный звонок / быстрый заказ ───────
 
 model CallbackRequest {
