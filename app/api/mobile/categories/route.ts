@@ -48,21 +48,34 @@ export async function GET(request: NextRequest) {
       return apiSuccess({ category, products });
     }
 
-    // Иначе — дерево категорий
+    // Иначе — дерево категорий с подсчётом товаров
     const categories = await prisma.category.findMany({
       where: { isActive: true, parentId: null },
       orderBy: { sortOrder: "asc" },
       select: {
         id: true, name: true, slug: true, image: true,
+        _count: { select: { products: { where: { isActive: true } } } },
         children: {
           where: { isActive: true },
           orderBy: { sortOrder: "asc" },
-          select: { id: true, name: true, slug: true, image: true },
+          select: {
+            id: true, name: true, slug: true, image: true,
+            _count: { select: { products: { where: { isActive: true } } } },
+          },
         },
       },
     });
 
-    return apiSuccess(categories);
+    // Добавим totalProducts = own + sum(children)
+    const result = categories.map((cat) => {
+      const childrenTotal = cat.children.reduce((sum, ch) => sum + ch._count.products, 0);
+      return {
+        ...cat,
+        totalProducts: cat._count.products + childrenTotal,
+      };
+    });
+
+    return apiSuccess(result);
   } catch (error) {
     console.error("Mobile categories error:", error);
     return apiError("Ошибка", 500, "INTERNAL_ERROR");
