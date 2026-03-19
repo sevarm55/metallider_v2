@@ -3,6 +3,60 @@ import { prisma } from "@/lib/prisma-client";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
 import { checkMobileApiKey } from "@/lib/check-api-key";
 
+// GET /api/mobile/orders?phone=xxx — заказы пользователя по телефону
+export async function GET(request: NextRequest) {
+  const keyError = checkMobileApiKey(request);
+  if (keyError) return keyError;
+
+  const phone = request.nextUrl.searchParams.get("phone");
+  if (!phone) {
+    return apiError("Телефон обязателен", 400, "MISSING_PHONE");
+  }
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: { phone: { contains: phone.replace(/\D/g, "").slice(-10) } },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                slug: true,
+                images: { orderBy: { position: "asc" }, take: 1 },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    const result = orders.map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        id: item.id,
+        qty: item.qty,
+        price: item.price,
+        total: item.total,
+        productName: item.product.name,
+        productSlug: item.product.slug,
+        productImage: item.product.images[0]?.url || null,
+      })),
+    }));
+
+    return apiSuccess(result);
+  } catch (error) {
+    console.error("Mobile get orders error:", error);
+    return apiError("Ошибка", 500, "INTERNAL_ERROR");
+  }
+}
+
 // POST /api/mobile/orders — создать заказ
 export async function POST(request: NextRequest) {
   const keyError = checkMobileApiKey(request);
