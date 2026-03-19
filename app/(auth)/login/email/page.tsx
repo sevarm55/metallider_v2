@@ -143,26 +143,6 @@ export default function EmailLoginPage() {
         </Button>
       </form>
 
-      {/* Divider */}
-      <div className="relative my-8">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-background px-3 text-muted-foreground">или</span>
-        </div>
-      </div>
-
-      {/* Phone login link */}
-      <p className="text-center text-sm text-muted-foreground">
-        <Link
-          href="/login"
-          className="font-semibold text-primary hover:underline"
-        >
-          Войти по телефону
-        </Link>
-      </p>
-
       {/* Register link */}
       <p className="mt-4 text-center text-sm text-muted-foreground">
         Нет аккаунта?{" "}

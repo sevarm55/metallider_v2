@@ -41,7 +41,7 @@ interface ProductsViewProps {
 }
 
 export function ProductsView({ products }: ProductsViewProps) {
-  const [view, setView] = useState<"grid" | "list" | "table">("grid");
+  const [view, setView] = useState<"grid" | "list" | "table">("table");
 
   return (
     <div>
@@ -341,18 +341,41 @@ function TableRowItem({ product }: { product: Product }) {
         </span>
 
         {/* Attributes */}
-        {product.attributes && product.attributes.length > 0 && (
-          <div className="hidden sm:flex flex-wrap gap-1 mt-0.5">
-            {product.attributes.slice(0, 3).map((a, i) => (
-              <span
-                key={i}
-                className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-400"
-              >
-                {a.name}: <span className="text-neutral-700">{a.value}{a.unit ? ` ${a.unit}` : ""}</span>
-              </span>
-            ))}
-          </div>
-        )}
+        {product.attributes && product.attributes.length > 0 && (() => {
+          const attrMap = new Map(product.attributes.map((a) => [a.key, a]));
+          const dimensionCombos = [
+            ["prof_height", "prof_width"],
+            ["ugol_a", "ugol_b"],
+            ["beam_flange", "beam_number"],
+            ["width", "length"],
+          ];
+          let sizeChip: { label: string; value: string } | null = null;
+          const hiddenKeys = new Set<string>();
+          for (const combo of dimensionCombos) {
+            const vals = combo.map((k) => attrMap.get(k)?.value).filter(Boolean) as string[];
+            if (vals.length >= 2) {
+              sizeChip = { label: "Размер", value: vals.join("х") + " мм" };
+              combo.forEach((k) => { if (attrMap.has(k)) hiddenKeys.add(k); });
+              break;
+            }
+          }
+          const visible = product.attributes.filter((a) => !hiddenKeys.has(a.key || ""));
+          const chips: { label: string; value: string }[] = [];
+          if (sizeChip) chips.push(sizeChip);
+          visible.slice(0, sizeChip ? 2 : 3).forEach((a) => {
+            chips.push({ label: a.name, value: `${a.value}${a.unit ? ` ${a.unit}` : ""}` });
+          });
+
+          return chips.length > 0 ? (
+            <div className="hidden sm:flex flex-wrap gap-1 mt-0.5">
+              {chips.map((c, i) => (
+                <span key={i} className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-400">
+                  {c.label}: <span className="text-neutral-700">{c.value}</span>
+                </span>
+              ))}
+            </div>
+          ) : null;
+        })()}
 
         {/* Price — mobile */}
         <div className="flex items-baseline gap-2 sm:hidden mt-1">

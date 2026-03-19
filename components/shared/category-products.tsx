@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ProductsView } from "./products-view";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ interface Subcategory {
   id: string;
   name: string;
   slug: string;
+  image?: string | null;
   count: number;
 }
 
@@ -208,48 +209,35 @@ export function CategoryProducts({ products, subcategories, parentSlug }: Catego
 
   return (
     <div>
-      {/* Subcategory tabs */}
+      {/* Subcategory cards */}
       {subcategories.length > 0 && (
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:gap-4">
-          {parentSlug ? (
-            <Link
-              href={`/catalog/${parentSlug}`}
-              className="group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
-            >
-              <span className="text-sm font-semibold">Все товары</span>
-              <span className="text-xs text-primary font-medium">{products.length}</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 text-primary" />
-            </Link>
-          ) : (
-            <button
-              onClick={() => { setActiveSubId(null); clearFilters(); }}
-              className={cn(
-                "group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 cursor-pointer",
-                activeSubId === null
-                  ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-              )}
-            >
-              <span className="text-sm font-semibold">Все товары</span>
-              <span className={cn("text-xs font-medium", activeSubId === null ? "text-primary" : "text-neutral-400")}>{products.length}</span>
-            </button>
-          )}
-
-          {subcategories.map((sub) => (
-            <button
-              key={sub.id}
-              onClick={() => { setActiveSubId(sub.id); clearFilters(); }}
-              className={cn(
-                "group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 cursor-pointer",
-                activeSubId === sub.id
-                  ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-              )}
-            >
-              <span className="text-sm font-semibold">{sub.name}</span>
-              <span className={cn("text-xs font-medium", activeSubId === sub.id ? "text-primary" : "text-neutral-400")}>{sub.count}</span>
-            </button>
-          ))}
+        <div className="mb-8 overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+          <div className="flex gap-0 min-w-max">
+            {subcategories.map((sub) => (
+              <button
+                key={sub.id}
+                onClick={() => { setActiveSubId(sub.id === activeSubId ? null : sub.id); clearFilters(); }}
+                className={cn(
+                  "flex items-center gap-3 px-6 py-4 border-b border-r border-neutral-200 first:border-l transition-all cursor-pointer",
+                  activeSubId === sub.id
+                    ? "bg-neutral-50 border-b-primary border-b-2"
+                    : "bg-white hover:bg-neutral-50"
+                )}
+              >
+                {sub.image ? (
+                  <img src={sub.image} alt={sub.name} className="h-10 w-10 object-contain shrink-0" />
+                ) : (
+                  <div className="h-10 w-10 bg-neutral-100 rounded shrink-0" />
+                )}
+                <span className={cn(
+                  "text-sm font-semibold whitespace-nowrap",
+                  activeSubId === sub.id ? "text-neutral-900" : "text-neutral-700"
+                )}>
+                  {sub.name}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

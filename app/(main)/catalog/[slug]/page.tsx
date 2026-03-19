@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/shared/json-ld";
 import { prisma } from "@/lib/prisma-client";
+import { cn } from "@/lib/utils";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://metallider.ru";
 
@@ -75,7 +76,7 @@ export default async function CategoryPage({ params }: PageProps) {
       children: {
         where: { isActive: true },
         orderBy: { sortOrder: "asc" },
-        select: { id: true, name: true, slug: true },
+        select: { id: true, name: true, slug: true, image: true },
       },
     },
   });
@@ -168,12 +169,13 @@ export default async function CategoryPage({ params }: PageProps) {
         id: sub.id,
         name: stripParentPrefix(sub.name, category.name),
         slug: sub.slug,
+        image: sub.image || null,
         count: products.filter((p) => p.categoryId === sub.id).length,
       }))
     : [];
 
   // Sibling categories if this is a subcategory (for filter tabs)
-  let siblings: { id: string; name: string; slug: string; count: number }[] = [];
+  let siblings: { id: string; name: string; slug: string; image: string | null; count: number }[] = [];
   if (category.parentId && category.parent) {
     const siblingCats = await prisma.category.findMany({
       where: { parentId: category.parentId, isActive: true },
@@ -182,6 +184,7 @@ export default async function CategoryPage({ params }: PageProps) {
         id: true,
         name: true,
         slug: true,
+        image: true,
         _count: { select: { products: { where: { isActive: true } } } },
       },
     });
@@ -189,6 +192,7 @@ export default async function CategoryPage({ params }: PageProps) {
       id: s.id,
       name: stripParentPrefix(s.name, category.parent!.name),
       slug: s.slug,
+      image: s.image || null,
       count: s._count.products,
     }));
   }
@@ -268,36 +272,34 @@ export default async function CategoryPage({ params }: PageProps) {
         />
       ) : siblings.length > 1 ? (
         <div>
-          {/* Sibling category cards with "All" link */}
-          <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:gap-4">
-            {/* All products card → parent category */}
-            <Link
-              href={`/catalog/${category.parent!.slug}`}
-              className="group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-            >
-              <span className="text-sm font-semibold">Все товары</span>
-              <span className="text-xs font-medium text-neutral-400">{siblings.reduce((sum, s) => sum + s.count, 0)}</span>
-              <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 text-neutral-400" />
-            </Link>
-            {siblings.map((s) => (
-              <Link
-                key={s.id}
-                href={`/catalog/${s.slug}`}
-                className={`group relative flex items-center gap-2 overflow-hidden rounded-2xl px-5 py-3 transition-all duration-300 ${
-                  s.id === category.id
-                    ? "bg-primary/10 text-neutral-900 ring-1 ring-primary/30"
-                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                }`}
-              >
-                <span className="text-sm font-semibold">{s.name}</span>
-                <span className={`text-xs font-medium ${
-                  s.id === category.id ? "text-primary" : "text-neutral-400"
-                }`}>{s.count}</span>
-                <ArrowRight className={`h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                  s.id === category.id ? "text-primary" : "text-neutral-400"
-                }`} />
-              </Link>
-            ))}
+          {/* Sibling category tabs */}
+          <div className="mb-8 overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <div className="flex gap-0 min-w-max">
+              {siblings.map((s) => (
+                <Link
+                  key={s.id}
+                  href={`/catalog/${s.slug}`}
+                  className={cn(
+                    "flex items-center gap-3 px-6 py-4 border-b border-r border-neutral-200 first:border-l transition-all",
+                    s.id === category.id
+                      ? "bg-neutral-50 border-b-primary border-b-2"
+                      : "bg-white hover:bg-neutral-50"
+                  )}
+                >
+                  {s.image ? (
+                    <img src={s.image} alt={s.name} className="h-10 w-10 object-contain shrink-0" />
+                  ) : (
+                    <div className="h-10 w-10 bg-neutral-100 rounded shrink-0" />
+                  )}
+                  <span className={cn(
+                    "text-sm font-semibold whitespace-nowrap",
+                    s.id === category.id ? "text-neutral-900" : "text-neutral-700"
+                  )}>
+                    {s.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
           {products.length > 0 ? (
             <CategoryProducts products={products} subcategories={[]} />

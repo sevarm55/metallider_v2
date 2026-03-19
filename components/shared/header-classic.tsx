@@ -101,7 +101,7 @@ export function HeaderClassic() {
             <Link href="/" className="group flex shrink-0 items-center gap-2">
               <div>
                 <div className="text-xl font-black tracking-tight text-neutral-900 font-(family-name:--font-unbounded)">
-                  МЕТАЛЛ<span className="text-primary">ЛИДЕР</span>
+                  МЕТАЛЛ <span className="text-primary">ЛИДЕР</span>
                 </div>
                 <p className="text-[10px] text-neutral-400 leading-tight hidden sm:block">металлопрокат оптом и в розницу</p>
               </div>

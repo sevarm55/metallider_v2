@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Truck, Shield, BadgePercent, Headset, ArrowRight, MapPin, Clock, Phone, BookOpen, Calendar, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
-import { HeroBento } from "@/components/shared/hero-bento";
+import { HeroFullwidth } from "@/components/shared/hero-fullwidth";
+import { CategoriesMarquee } from "@/components/shared/categories-marquee";
 import { ProductCard } from "@/components/shared/product-card";
 import { MetalCalculator } from "@/components/shared/metal-calculator";
 import { CustomerReviews } from "@/components/shared/customer-reviews";
@@ -112,9 +113,18 @@ export default async function HomePage() {
       {/* Hero Bento */}
       <section className="bg-neutral-50">
         <Container className="py-4">
-          <HeroBento />
+          <HeroFullwidth />
         </Container>
       </section>
+
+      {/* Categories marquee */}
+      <CategoriesMarquee
+        categories={dbCategories.flatMap((parent) =>
+          parent.children.length > 0
+            ? parent.children.map((c: any) => ({ name: c.name, slug: c.slug }))
+            : [{ name: parent.name, slug: parent.slug }]
+        )}
+      />
 
       {/* Categories — horizontal scroll */}
       <section className="py-12 lg:py-16">
