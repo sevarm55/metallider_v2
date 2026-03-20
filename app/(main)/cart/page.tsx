@@ -222,7 +222,7 @@ export default function CartPage() {
 
                 return (
                   <div
-                    key={`${item.productId}-${idx}`}
+                    key={`${product.id}-${idx}`}
                     className="flex gap-3 sm:gap-4 rounded-xl bg-neutral-50/50 p-3 transition-colors hover:bg-neutral-50"
                   >
                     {/* Image */}
