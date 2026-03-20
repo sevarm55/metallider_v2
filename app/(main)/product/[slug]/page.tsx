@@ -483,7 +483,7 @@ export default async function ProductPage({ params }: PageProps) {
                   <Clock className="h-4 w-4 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-neutral-900">Срок — 1-3 рабочих дня</p>
+                  <p className="text-sm font-semibold text-neutral-900">Срок 1 рабочих дня</p>
                   <p className="text-xs text-neutral-500 mt-0.5">Точные сроки уточняйте у менеджера</p>
                 </div>
               </div>
