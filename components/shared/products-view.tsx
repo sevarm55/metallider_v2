@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   LayoutGrid,
@@ -11,6 +11,10 @@ import {
   Check,
   Loader2,
   Heart,
+  Table2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
@@ -41,7 +45,9 @@ interface ProductsViewProps {
 }
 
 export function ProductsView({ products }: ProductsViewProps) {
-  const [view, setView] = useState<"grid" | "list" | "table">("table");
+  const [view, setView] = useState<"grid" | "list" | "table" | "matrix">("table");
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   return (
     <div>
@@ -78,6 +84,15 @@ export function ProductsView({ products }: ProductsViewProps) {
           >
             <List className="h-4 w-4" />
           </Toggle>
+          <Toggle
+            pressed={view === "matrix"}
+            onPressedChange={() => setView("matrix")}
+            size="sm"
+            aria-label="Матрица"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          >
+            <Table2 className="h-4 w-4" />
+          </Toggle>
         </div>
       </div>
 
@@ -93,12 +108,17 @@ export function ProductsView({ products }: ProductsViewProps) {
             <ListItem key={product.id} product={product} />
           ))}
         </div>
-      ) : (
+      ) : view === "table" ? (
         <div className="space-y-2">
           {products.map((product) => (
             <TableRowItem key={product.id} product={product} />
           ))}
         </div>
+      ) : (
+        <MatrixView products={products} sortKey={sortKey} sortDir={sortDir} onSort={(key) => {
+          if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
+          else { setSortKey(key); setSortDir("asc"); }
+        }} />
       )}
     </div>
   );
@@ -458,5 +478,257 @@ function TableRowItem({ product }: { product: Product }) {
         </button>
       </div>
     </div>
+  );
+}
+
+// ═══════ Matrix / Spreadsheet View ═══════
+
+function MatrixView({
+  products,
+  sortKey,
+  sortDir,
+  onSort,
+}: {
+  products: Product[];
+  sortKey: string | null;
+  sortDir: "asc" | "desc";
+  onSort: (key: string) => void;
+}) {
+  // Collect all unique attribute columns
+  const columns = useMemo(() => {
+    const dimensionCombos = [
+      ["prof_height", "prof_width"],
+      ["ugol_a", "ugol_b"],
+      ["beam_flange", "beam_number"],
+      ["width", "length"],
+    ];
+
+    // Find active combo
+    let comboKeys: string[] | null = null;
+    for (const combo of dimensionCombos) {
+      const has = products.some((p) => {
+        const keys = new Set(p.attributes?.map((a) => a.key) || []);
+        return combo.filter((k) => keys.has(k)).length >= 2;
+      });
+      if (has) { comboKeys = combo; break; }
+    }
+
+    const seen = new Map<string, { name: string; unit: string | null }>();
+    products.forEach((p) => {
+      p.attributes?.forEach((a) => {
+        if (a.key && !seen.has(a.key) && !comboKeys?.includes(a.key)) {
+          seen.set(a.key, { name: a.name, unit: a.unit || null });
+        }
+      });
+    });
+
+    const cols: { key: string; name: string; unit: string | null }[] = [];
+    if (comboKeys) cols.push({ key: "__size__", name: "Размер", unit: "мм" });
+    seen.forEach((v, k) => cols.push({ key: k, name: v.name, unit: v.unit }));
+    return { cols, comboKeys };
+  }, [products]);
+
+  // Sort products
+  const sorted = useMemo(() => {
+    if (!sortKey) return products;
+    return [...products].sort((a, b) => {
+      let va: number | string = "";
+      let vb: number | string = "";
+
+      if (sortKey === "__price__") {
+        va = a.specialPrice && a.specialPrice > 0 && a.specialPrice < a.price ? a.specialPrice : a.price;
+        vb = b.specialPrice && b.specialPrice > 0 && b.specialPrice < b.price ? b.specialPrice : b.price;
+      } else if (sortKey === "__name__") {
+        va = a.name; vb = b.name;
+      } else if (sortKey === "__size__" && columns.comboKeys) {
+        const getSize = (p: Product) => {
+          const m = new Map((p.attributes || []).map((x) => [x.key, x.value]));
+          return columns.comboKeys!.map((k) => parseFloat(m.get(k) || "0")).reduce((s, n) => s + n, 0);
+        };
+        va = getSize(a); vb = getSize(b);
+      } else {
+        const getVal = (p: Product) => {
+          const attr = p.attributes?.find((x) => x.key === sortKey);
+          return attr ? (parseFloat(attr.value.replace(",", ".")) || attr.value) : "";
+        };
+        va = getVal(a); vb = getVal(b);
+      }
+
+      if (typeof va === "number" && typeof vb === "number") {
+        return sortDir === "asc" ? va - vb : vb - va;
+      }
+      const cmp = String(va).localeCompare(String(vb), "ru", { numeric: true });
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [products, sortKey, sortDir, columns]);
+
+  function SortIcon({ colKey }: { colKey: string }) {
+    if (sortKey !== colKey) return <ArrowUpDown className="h-3 w-3 text-neutral-300" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 text-primary" />
+      : <ArrowDown className="h-3 w-3 text-primary" />;
+  }
+
+  return (
+    <div className="rounded-xl border border-neutral-200 overflow-x-auto bg-white">
+      <table className="w-full border-collapse text-[13px]">
+        <thead>
+          <tr className="bg-neutral-900 text-white">
+            <th className="sticky left-0 z-10 bg-neutral-900 px-3 py-3 text-left font-semibold min-w-[200px]">
+              <button onClick={() => onSort("__name__")} className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors">
+                Товар <SortIcon colKey="__name__" />
+              </button>
+            </th>
+            {columns.cols.map((col) => (
+              <th key={col.key} className="px-3 py-3 text-center font-semibold whitespace-nowrap min-w-[90px]">
+                <button onClick={() => onSort(col.key)} className="flex items-center gap-1.5 mx-auto cursor-pointer hover:text-primary transition-colors">
+                  {col.name}
+                  {col.unit && <span className="font-normal text-white/50 text-[10px]">{col.unit}</span>}
+                  <SortIcon colKey={col.key} />
+                </button>
+              </th>
+            ))}
+            <th className="px-3 py-3 text-center font-semibold min-w-[100px]">
+              <button onClick={() => onSort("__price__")} className="flex items-center gap-1.5 mx-auto cursor-pointer hover:text-primary transition-colors">
+                Цена <SortIcon colKey="__price__" />
+              </button>
+            </th>
+            <th className="px-3 py-3 text-center min-w-[130px]" />
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((product, idx) => {
+            const attrMap = new Map((product.attributes || []).map((a) => [a.key, a.value]));
+            const hasDiscount = !!product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price;
+            const effectivePrice = hasDiscount ? product.specialPrice! : product.price;
+
+            return (
+              <MatrixRow
+                key={product.id}
+                product={product}
+                columns={columns}
+                attrMap={attrMap}
+                hasDiscount={hasDiscount}
+                effectivePrice={effectivePrice}
+                isEven={idx % 2 === 0}
+              />
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function MatrixRow({
+  product,
+  columns,
+  attrMap,
+  hasDiscount,
+  effectivePrice,
+  isEven,
+}: {
+  product: Product;
+  columns: { cols: { key: string; name: string; unit: string | null }[]; comboKeys: string[] | null };
+  attrMap: Map<string, string>;
+  hasDiscount: boolean;
+  effectivePrice: number;
+  isEven: boolean;
+}) {
+  const [qty, setQty] = useState(1);
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const addItem = useCartStore((s) => s.addItem);
+
+  function handleAdd() {
+    setAdding(true);
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: effectivePrice,
+      image: product.images?.[0] || product.image || null,
+      slug: product.slug,
+      code: product.code,
+      unit: product.unit,
+      quantity: qty,
+    });
+    setAdded(true);
+    setTimeout(() => { setAdded(false); setAdding(false); }, 800);
+  }
+
+  return (
+    <tr className={cn(
+      "border-b border-neutral-100 transition-colors hover:bg-primary/5",
+      isEven ? "bg-white" : "bg-neutral-50/50"
+    )}>
+      {/* Product name — sticky */}
+      <td className={cn("sticky left-0 z-10 px-3 py-2.5", isEven ? "bg-white" : "bg-neutral-50/80")}>
+        <Link href={`/product/${product.slug}`} className="flex items-center gap-2.5 group">
+          {(product.images?.[0] || product.image) && (
+            <img src={product.images?.[0] || product.image!} alt="" className="h-8 w-8 rounded object-cover shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-neutral-800 group-hover:text-primary transition-colors">
+              {product.name}
+            </p>
+            {product.code && (
+              <p className="text-[10px] text-neutral-400">{product.code}</p>
+            )}
+          </div>
+        </Link>
+      </td>
+
+      {/* Attribute columns */}
+      {columns.cols.map((col) => {
+        let value = "";
+        if (col.key === "__size__" && columns.comboKeys) {
+          const vals = columns.comboKeys.map((k) => attrMap.get(k)).filter(Boolean);
+          value = vals.length >= 2 ? vals.join("×") : "—";
+        } else {
+          value = attrMap.get(col.key) || "—";
+        }
+        return (
+          <td key={col.key} className="px-3 py-2.5 text-center text-[13px] text-neutral-700 font-medium">
+            {value !== "—" ? value : <span className="text-neutral-300">—</span>}
+          </td>
+        );
+      })}
+
+      {/* Price */}
+      <td className="px-3 py-2.5 text-center">
+        <span className="text-[15px] font-black text-neutral-900">
+          {effectivePrice.toLocaleString("ru-RU")}
+        </span>
+        <span className="text-[10px] text-neutral-400 ml-0.5">₽/{product.unit}</span>
+        {hasDiscount && (
+          <span className="block text-[10px] text-neutral-400 line-through">
+            {product.price.toLocaleString("ru-RU")}
+          </span>
+        )}
+      </td>
+
+      {/* Cart */}
+      <td className="px-2 py-2.5">
+        <div className="flex items-center gap-1.5 justify-center">
+          <div className="flex items-center rounded-lg border border-neutral-200 h-8">
+            <button onClick={() => setQty(Math.max(0.5, qty - (qty <= 1 ? 0.5 : 1)))} className="px-2 text-neutral-400 hover:text-neutral-700 cursor-pointer">−</button>
+            <span className="text-xs font-medium w-6 text-center">{qty}</span>
+            <button onClick={() => setQty(qty + (qty < 1 ? 0.5 : 1))} className="px-2 text-neutral-400 hover:text-neutral-700 cursor-pointer">+</button>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={adding}
+            className={cn(
+              "h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer",
+              added
+                ? "bg-emerald-500 text-white"
+                : "bg-primary text-white hover:bg-primary/90"
+            )}
+          >
+            {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }

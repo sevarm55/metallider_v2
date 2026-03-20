@@ -4,6 +4,20 @@ import { apiSuccess, apiError } from "@/lib/types/api-response";
 import { getAdminUserId } from "@/lib/get-admin-user-id";
 import { logAdminAction } from "@/lib/admin-logger";
 
+// Restore stock for all items in an order
+async function restoreStock(orderId: string) {
+  const items = await prisma.orderItem.findMany({
+    where: { orderId },
+    select: { productId: true, qty: true },
+  });
+  for (const item of items) {
+    await prisma.product.update({
+      where: { id: item.productId },
+      data: { stock: { increment: item.qty } },
+    });
+  }
+}
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const adminUserId = await getAdminUserId();
@@ -19,6 +33,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const data: Record<string, unknown> = {};
     if (status) data.status = status;
     if (notes !== undefined) data.notes = notes;
+
+    // Restore stock when order is cancelled (and wasn't cancelled before)
+    if (status === "CANCELLED" && existing.status !== "CANCELLED") {
+      await restoreStock(id);
+    }
 
     const order = await prisma.order.update({
       where: { id },
@@ -49,6 +68,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     const order = await prisma.order.findUnique({ where: { id } });
     if (!order) return apiError("Заказ не найден", 404, "NOT_FOUND");
+
+    // Restore stock before deleting (if not already cancelled)
+    if (order.status !== "CANCELLED") {
+      await restoreStock(id);
+    }
 
     await prisma.order.delete({ where: { id } });
 

@@ -211,7 +211,7 @@ export default function CartPage() {
                   {totalItems} {totalItems === 1 ? "товар" : totalItems < 5 ? "товара" : "товаров"}
                 </span>
               </div>
-              {items.map((item) => {
+              {items.map((item, idx) => {
                 const { product } = item;
                 const hasDiscount =
                   product.specialPrice &&
@@ -222,7 +222,7 @@ export default function CartPage() {
 
                 return (
                   <div
-                    key={product.id}
+                    key={`${item.productId}-${idx}`}
                     className="flex gap-3 sm:gap-4 rounded-xl bg-neutral-50/50 p-3 transition-colors hover:bg-neutral-50"
                   >
                     {/* Image */}

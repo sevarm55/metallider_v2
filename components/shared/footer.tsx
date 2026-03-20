@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 import { Container } from "./container";
 import { contactInfo } from "@/lib/mock-data";
 
@@ -20,6 +20,7 @@ const infoLinks = [
   { label: "О компании", href: "/about" },
   { label: "Контакты", href: "/contacts" },
   { label: "Акции", href: "/promotions" },
+  { label: "Блог", href: "/blog" },
   { label: "Политика конфиденциальности", href: "/privacy" },
   { label: "Публичная оферта", href: "/offer" },
 ];
@@ -110,18 +111,20 @@ export function Footer() {
           </h3>
           <div className="flex gap-3">
             <a
-              href="#"
+              href="https://t.me/+74957605549"
+              target="_blank"
               className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 hover:bg-primary hover:text-white transition-colors"
               aria-label="Telegram"
             >
               <Send className="h-5 w-5" />
             </a>
             <a
-              href="#"
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 hover:bg-primary hover:text-white transition-colors text-sm font-bold"
-              aria-label="ВКонтакте"
+              href="https://wa.me/74957605549"
+              target="_blank"
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 hover:bg-primary hover:text-white transition-colors"
+              aria-label="WhatsApp"
             >
-              VK
+              <MessageCircle className="h-5 w-5" />
             </a>
           </div>
           <div className="mt-6">

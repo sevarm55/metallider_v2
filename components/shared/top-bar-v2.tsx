@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
+import { Clock, Mail, MapPin, Phone, Send, MessageCircle } from "lucide-react";
 import { Container } from "./container";
 import { contactInfo } from "@/lib/mock-data";
 
@@ -35,11 +35,11 @@ export function TopBar() {
           </span>
           <span className="hidden sm:flex h-3 w-px bg-white/10" />
           <div className="hidden items-center gap-3 sm:flex">
-            <a href="#" className="hover:text-primary transition-colors" aria-label="Telegram">
+            <a href="https://t.me/+74957605549" target="_blank" className="hover:text-primary transition-colors" aria-label="Telegram">
               <Send className="h-3 w-3" />
             </a>
-            <a href="#" className="hover:text-primary transition-colors text-[10px] font-bold" aria-label="VK">
-              VK
+            <a href="https://wa.me/74957605549" target="_blank" className="hover:text-primary transition-colors" aria-label="WhatsApp">
+              <MessageCircle className="h-3 w-3" />
             </a>
           </div>
         </div>

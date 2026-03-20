@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma-client";
 import { sendTelegramMessage } from "@/lib/send-telegram";
+import { sendEmail, buildOrderConfirmationEmail } from "@/lib/send-email";
 import { getUserSession } from "@/lib/get-user-session";
 
 interface OrderItemBody {
@@ -41,13 +42,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch actual prices from DB
+    // Fetch actual prices and stock from DB
     const productIds = body.items.map((i) => i.id);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, price: true, specialPrice: true, unit: true },
+      select: { id: true, name: true, price: true, specialPrice: true, unit: true, stock: true },
     });
     const productMap = new Map(products.map((p) => [p.id, p]));
+
+    // Check stock availability
+    const outOfStock: string[] = [];
+    for (const item of body.items) {
+      const product = productMap.get(item.id);
+      if (!product) continue;
+      if (product.stock < item.quantity) {
+        outOfStock.push(`${product.name} (в наличии ${product.stock}, запрошено ${item.quantity})`);
+      }
+    }
+    if (outOfStock.length > 0) {
+      return NextResponse.json(
+        { error: `Недостаточно товара на складе: ${outOfStock.join(", ")}` },
+        { status: 400 },
+      );
+    }
 
     const orderItems = body.items.map((item) => {
       const product = productMap.get(item.id);
@@ -90,6 +107,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Decrease stock
+    for (const item of orderItems) {
+      await prisma.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.qty } },
+      });
+    }
+
     // Send to Telegram
     const itemsText = body.items
       .map((item, i) => {
@@ -122,7 +147,31 @@ ${itemsText}
       await sendTelegramMessage(message);
     } catch (tgError) {
       console.error("Telegram send failed:", tgError);
-      // Order is saved, Telegram is secondary
+    }
+
+    // Send order confirmation email to customer
+    if (body.email) {
+      try {
+        const unitLabelsMap: Record<string, string> = { PCS: "шт", METER: "м", M2: "м²", KG: "кг", PACK: "уп", SET: "компл" };
+        const emailData = buildOrderConfirmationEmail({
+          orderNumber: order.orderNumber,
+          fullName: body.name,
+          totalAmount,
+          items: body.items.map((item, i) => {
+            const product = productMap.get(item.id);
+            return {
+              name: product?.name || "Товар",
+              qty: item.quantity,
+              price: orderItems[i].price,
+              total: orderItems[i].total,
+              unit: product ? (unitLabelsMap[product.unit] || "шт") : "шт",
+            };
+          }),
+        });
+        await sendEmail({ to: body.email, ...emailData });
+      } catch (emailError) {
+        console.error("Order email send failed:", emailError);
+      }
     }
 
     return NextResponse.json({ orderNumber: order.orderNumber });

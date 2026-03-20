@@ -1,29 +1,39 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma-client";
 import { apiSuccess, apiError } from "@/lib/types/api-response";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+const REVIEW_COOKIE = "review_submitted";
+
 // Public: get all visible reviews
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const reviews = await prisma.review.findMany({
       where: { isVisible: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
-    return apiSuccess(reviews);
+
+    const hasSubmitted = request.cookies.get(REVIEW_COOKIE)?.value === "1";
+
+    return NextResponse.json({ success: true, data: reviews, hasSubmitted });
   } catch (error) {
     console.error("Get reviews error:", error);
     return apiError("Ошибка загрузки отзывов", 500, "INTERNAL_ERROR");
   }
 }
 
-// Public: submit a review
+// Public: submit a review (one per device)
 export async function POST(request: NextRequest) {
   const rateLimitResponse = checkRateLimit(request, "api");
   if (rateLimitResponse) return rateLimitResponse;
+
+  // Check cookie
+  if (request.cookies.get(REVIEW_COOKIE)?.value === "1") {
+    return apiError("Вы уже оставили отзыв", 400, "ALREADY_SUBMITTED");
+  }
 
   try {
     const body = await request.json();
@@ -46,7 +56,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return apiSuccess(review, "Отзыв отправлен!", 201);
+    // Set cookie for 1 year
+    const response = NextResponse.json({
+      success: true,
+      data: review,
+      message: "Отзыв отправлен!",
+    }, { status: 201 });
+
+    response.cookies.set(REVIEW_COOKIE, "1", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 365 * 24 * 60 * 60, // 1 year
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     console.error("Create review error:", error);
     return apiError("Ошибка отправки отзыва", 500, "INTERNAL_ERROR");

@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Zap,
   Send,
+  MessageCircle,
   Mail,
   Bot,
   Sparkles,
@@ -77,11 +78,11 @@ export function HeaderClassic() {
               {contactInfo.workingHours}
             </span>
             <div className="flex items-center gap-2 pl-2 border-l border-white/10">
-              <a href="#" className="hover:text-primary transition-colors" aria-label="Telegram">
+              <a href="https://t.me/+74957605549" target="_blank" className="hover:text-primary transition-colors" aria-label="Telegram">
                 <Send className="h-3 w-3" />
               </a>
-              <a href="#" className="hover:text-primary transition-colors font-bold" aria-label="VK">
-                VK
+              <a href="https://wa.me/74957605549" target="_blank" className="hover:text-primary transition-colors" aria-label="WhatsApp">
+                <MessageCircle className="h-3 w-3" />
               </a>
             </div>
           </div>

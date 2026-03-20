@@ -78,23 +78,33 @@ export async function POST(request: NextRequest) {
     let totalAmount = 0;
     const orderItems: { productId: string; qty: number; price: number; total: number }[] = [];
 
+    const outOfStock: string[] = [];
     for (const item of items) {
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
-        select: { id: true, price: true, specialPrice: true },
+        select: { id: true, name: true, price: true, specialPrice: true, stock: true },
       });
 
       if (!product) continue;
+
+      const qty = Math.max(0.01, Number(item.qty) || 1);
+
+      if (product.stock < qty) {
+        outOfStock.push(product.name);
+        continue;
+      }
 
       const price = product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price
         ? product.specialPrice
         : product.price;
 
-      const qty = Math.max(0.01, Number(item.qty) || 1);
       const total = price * qty;
-
       orderItems.push({ productId: product.id, qty, price, total });
       totalAmount += total;
+    }
+
+    if (outOfStock.length > 0) {
+      return apiError(`Недостаточно на складе: ${outOfStock.join(", ")}`, 400, "OUT_OF_STOCK");
     }
 
     if (orderItems.length === 0) {
@@ -116,6 +126,14 @@ export async function POST(request: NextRequest) {
       },
       include: { items: true },
     });
+
+    // Decrease stock
+    for (const item of orderItems) {
+      await prisma.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.qty } },
+      });
+    }
 
     return apiSuccess({
       orderId: order.id,

@@ -188,11 +188,11 @@ export default function ContactsPage() {
                     </div>
 
                     <div className="mt-5 flex gap-2">
-                      <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                      <a href="https://t.me/+74957605549" target="_blank" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
                         <Send className="h-3.5 w-3.5" />
                         Telegram
                       </a>
-                      <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                      <a href="https://wa.me/74957605549" target="_blank" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
                         <MessageCircle className="h-3.5 w-3.5" />
                         WhatsApp
                       </a>
@@ -258,11 +258,11 @@ export default function ContactsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
+                  <a href="https://t.me/+74957605549" target="_blank" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors">
                     <Send className="h-3.5 w-3.5" />
                     Telegram
                   </a>
-                  <a href="#" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                  <a href="https://wa.me/74957605549" target="_blank" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors">
                     <MessageCircle className="h-3.5 w-3.5" />
                     WhatsApp
                   </a>

@@ -26,6 +26,7 @@ export function ReviewsWidget() {
   const [hoverRating, setHoverRating] = useState(0);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
     if (open && reviews.length === 0) {
@@ -37,7 +38,10 @@ export function ReviewsWidget() {
     setLoading(true);
     try {
       const res = await axiosInstance.get("/reviews");
-      if (res.data.success) setReviews(res.data.data);
+      if (res.data.success) {
+        setReviews(res.data.data);
+        if (res.data.hasSubmitted) setHasSubmitted(true);
+      }
     } catch {}
     finally { setLoading(false); }
   }
@@ -50,10 +54,10 @@ export function ReviewsWidget() {
       const res = await axiosInstance.post("/reviews", { name, text, rating });
       if (res.data.success) {
         setSent(true);
+        setHasSubmitted(true);
         setName("");
         setText("");
         setRating(5);
-        // Reload reviews
         loadReviews();
         setTimeout(() => { setSent(false); setTab("list"); }, 2000);
       }
@@ -118,15 +122,17 @@ export function ReviewsWidget() {
               >
                 Все отзывы
               </button>
-              <button
-                onClick={() => setTab("form")}
-                className={cn(
-                  "flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer",
-                  tab === "form" ? "text-primary border-b-2 border-primary" : "text-neutral-400 hover:text-neutral-600"
-                )}
-              >
-                Написать
-              </button>
+              {!hasSubmitted && (
+                <button
+                  onClick={() => setTab("form")}
+                  className={cn(
+                    "flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer",
+                    tab === "form" ? "text-primary border-b-2 border-primary" : "text-neutral-400 hover:text-neutral-600"
+                  )}
+                >
+                  Написать
+                </button>
+              )}
             </div>
 
             {/* Content */}
