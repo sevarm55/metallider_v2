@@ -598,7 +598,7 @@ function MatrixView({
         </thead>
         <tbody>
           {sorted.map((product, idx) => {
-            const attrMap = new Map((product.attributes || []).map((a) => [a.key, a.value]));
+            const attrMap = new Map((product.attributes || []).filter((a) => a.key).map((a) => [a.key!, a.value]));
             const hasDiscount = !!product.specialPrice && product.specialPrice > 0 && product.specialPrice < product.price;
             const effectivePrice = hasDiscount ? product.specialPrice! : product.price;
 
@@ -643,15 +643,15 @@ function MatrixRow({
   function handleAdd() {
     setAdding(true);
     addItem({
-      productId: product.id,
+      id: product.id,
       name: product.name,
       price: effectivePrice,
+      specialPrice: product.specialPrice,
       image: product.images?.[0] || product.image || null,
       slug: product.slug,
       code: product.code,
       unit: product.unit,
-      quantity: qty,
-    });
+    }, qty);
     setAdded(true);
     setTimeout(() => { setAdded(false); setAdding(false); }, 800);
   }
