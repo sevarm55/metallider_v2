@@ -105,8 +105,12 @@ export async function fetchMoyskladImages(productId: string): Promise<string[]> 
 
       if (!imgRes.ok) continue;
 
-      const buffer = Buffer.from(await imgRes.arrayBuffer());
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const rawBuffer = Buffer.from(await imgRes.arrayBuffer());
+      const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+
+      // Конвертируем в WebP
+      const sharp = (await import("sharp")).default;
+      const buffer = await sharp(rawBuffer).webp({ quality: 80 }).toBuffer();
 
       const fs = await import("fs/promises");
       const path = await import("path");

@@ -114,7 +114,7 @@ export function QuantitySelector({
       <Button
         variant="ghost"
         size="icon"
-        className={cn("shrink-0", isSmall ? "h-9 w-9" : "h-8 w-8")}
+        className={cn("shrink-0", isSmall ? "h-9 w-9" : "h-10 w-10")}
         onClick={decrement}
         disabled={qty <= min}
       >
@@ -145,7 +145,7 @@ export function QuantitySelector({
       <Button
         variant="ghost"
         size="icon"
-        className={cn("shrink-0", isSmall ? "h-9 w-9" : "h-8 w-8")}
+        className={cn("shrink-0", isSmall ? "h-9 w-9" : "h-10 w-10")}
         onClick={increment}
         disabled={qty >= max}
       >

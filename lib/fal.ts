@@ -152,8 +152,9 @@ export async function generateCategoryImage(
 }
 
 /**
- * Скачивает изображение по URL и сохраняет в public/uploads/products/.
+ * Скачивает изображение по URL и сохраняет в public/uploads/products/ как WebP.
  * Для сгенерированных фото накладывает водяной знак.
+ * nobg сохраняется как PNG (нужна прозрачность).
  */
 export async function downloadAndSave(
   remoteUrl: string,
@@ -169,8 +170,16 @@ export async function downloadAndSave(
     buffer = Buffer.from(await addWatermark(buffer));
   }
 
-  const ext = remoteUrl.includes(".png") || suffix === "nobg" ? "png" : "jpg";
+  const sharp = (await import("sharp")).default;
+
+  // nobg — оставляем PNG (прозрачность), остальное конвертируем в WebP
+  const keepPng = suffix === "nobg";
+  const ext = keepPng ? "png" : "webp";
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${suffix}.${ext}`;
+
+  if (!keepPng) {
+    buffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
+  }
 
   const fs = await import("fs/promises");
   const path = await import("path");

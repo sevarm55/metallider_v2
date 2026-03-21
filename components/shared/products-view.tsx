@@ -242,16 +242,16 @@ function ListItem({ product }: { product: Product }) {
           <button
             onClick={handleAdd}
             className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-lg h-8 text-xs font-bold transition-all",
+              "flex items-center justify-center gap-2 rounded-lg h-8 px-4 min-w-[120px] text-xs font-bold transition-all",
               added
                 ? "bg-emerald-500 text-white"
                 : "bg-primary text-white hover:bg-primary/90",
             )}
           >
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <><Loader2 className="h-4 w-4 animate-spin" /> Загрузка</>
             ) : added ? (
-              <Check className="h-4 w-4" />
+              <><Check className="h-4 w-4" /> Добавлено</>
             ) : (
               <>
                 <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
@@ -459,16 +459,16 @@ function TableRowItem({ product }: { product: Product }) {
         <button
           onClick={handleAdd}
           className={cn(
-            "flex items-center justify-center gap-2 rounded-lg h-9 px-4 text-xs font-bold transition-all",
+            "flex items-center justify-center gap-2 rounded-lg h-9 px-4 min-w-[120px] text-xs font-bold transition-all",
             added
               ? "bg-emerald-500 text-white"
               : "bg-primary text-white hover:bg-primary/90",
           )}
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <><Loader2 className="h-4 w-4 animate-spin" /> <span className="hidden lg:inline">Загрузка</span></>
           ) : added ? (
-            <Check className="h-4 w-4" />
+            <span className="hidden lg:inline">Добавлено</span>
           ) : (
             <>
               <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
@@ -725,7 +725,7 @@ function MatrixRow({
                 : "bg-primary text-white hover:bg-primary/90"
             )}
           >
-            {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
+            {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
           </button>
         </div>
       </td>

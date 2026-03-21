@@ -119,6 +119,66 @@ export default async function ProductPage({ params }: PageProps) {
 
   const unit = unitLabels[product.unit] || "шт";
 
+  // Find sibling products with same dimensions but different thickness
+  const attrMap = new Map(product.attributes.map((pa) => [pa.attribute.key, pa.value]));
+  const dimensionKeys = [
+    ["prof_height", "prof_width"],
+    ["ugol_a", "ugol_b"],
+    ["beam_flange", "beam_number"],
+    ["diameter"],
+  ];
+
+  let thicknessVariants: { slug: string; thickness: string; price: number; isCurrent: boolean }[] = [];
+
+  // Find which dimension combo this product uses
+  for (const combo of dimensionKeys) {
+    const vals = combo.map((k) => attrMap.get(k)).filter(Boolean);
+    if (vals.length === combo.length) {
+      // Find all products in same category with same dimension values
+      const siblings = await prisma.product.findMany({
+        where: {
+          categoryId: product.categoryId,
+          isActive: true,
+          attributes: {
+            some: {
+              attribute: { key: combo[0] },
+              value: vals[0]!,
+            },
+          },
+        },
+        select: {
+          id: true,
+          slug: true,
+          price: true,
+          specialPrice: true,
+          attributes: {
+            where: { attribute: { key: { in: [...combo, "thickness"] } } },
+            select: { value: true, attribute: { select: { key: true } } },
+          },
+        },
+      });
+
+      // Filter: same dimensions, collect thickness variants
+      thicknessVariants = siblings
+        .filter((s) => {
+          // Check all dimension keys match
+          return combo.every((k) => {
+            const sVal = s.attributes.find((a) => a.attribute.key === k)?.value;
+            return sVal === attrMap.get(k);
+          });
+        })
+        .map((s) => {
+          const thick = s.attributes.find((a) => a.attribute.key === "thickness")?.value || "";
+          const effectivePrice = s.specialPrice && s.specialPrice > 0 && s.specialPrice < s.price ? s.specialPrice : s.price;
+          return { slug: s.slug, thickness: thick, price: effectivePrice, isCurrent: s.id === product.id };
+        })
+        .filter((v) => v.thickness)
+        .sort((a, b) => parseFloat(a.thickness) - parseFloat(b.thickness));
+
+      break;
+    }
+  }
+
   // Related products from same category
   const relatedDb = product.categoryId
     ? await prisma.product.findMany({
@@ -298,6 +358,35 @@ export default async function ProductPage({ params }: PageProps) {
                   </>
                 )}
               </div>
+
+              {/* Thickness variants */}
+              {thicknessVariants.length > 1 && (
+                <div className="mt-5 pt-5 border-t border-neutral-100">
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2.5">Толщина стенки</p>
+                  <div className="flex flex-wrap gap-2">
+                    {thicknessVariants.map((v) => (
+                      v.isCurrent ? (
+                        <span
+                          key={v.slug}
+                          className="inline-flex flex-col items-center rounded-xl bg-primary text-white px-4 py-2 min-w-[60px]"
+                        >
+                          <span className="text-sm font-bold">{v.thickness} мм</span>
+                          <span className="text-[10px] text-white/70">{v.price.toLocaleString("ru-RU")} ₽</span>
+                        </span>
+                      ) : (
+                        <Link
+                          key={v.slug}
+                          href={`/product/${v.slug}`}
+                          className="inline-flex flex-col items-center rounded-xl border border-neutral-200 bg-white px-4 py-2 min-w-[60px] hover:border-primary/40 hover:bg-primary/5 transition-all"
+                        >
+                          <span className="text-sm font-bold text-neutral-800">{v.thickness} мм</span>
+                          <span className="text-[10px] text-neutral-400">{v.price.toLocaleString("ru-RU")} ₽</span>
+                        </Link>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Add to cart */}
               <div className="mt-5">

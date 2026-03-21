@@ -27,13 +27,18 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
 
     const uploadDir = path.join(process.cwd(), "public/uploads/products");
     await mkdir(uploadDir, { recursive: true });
 
-    await writeFile(path.join(uploadDir, filename), buffer);
+    // Конвертируем в WebP через Sharp (качество 80 — оптимальный баланс)
+    const sharp = (await import("sharp")).default;
+    const webpBuffer = await sharp(buffer)
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    await writeFile(path.join(uploadDir, filename), webpBuffer);
 
     return apiSuccess({ url: `/uploads/products/${filename}` });
   } catch (error) {
