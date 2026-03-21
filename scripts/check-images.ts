@@ -6,24 +6,25 @@ const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 async function main() {
   await client.connect();
 
+  // Проверяем и обновляем категории
   const r1 = await client.query(
-    `SELECT id, image FROM categories WHERE image LIKE '%.png' OR image LIKE '%.jpg' LIMIT 10`
+    `UPDATE categories SET image = regexp_replace(image, '\\.(png|jpe?g)$', '.webp') WHERE image ~ '\\.(png|jpe?g)$'`
   );
-  console.log("Категории с PNG/JPG:", r1.rows.length > 0 ? r1.rows : "нет — всё WebP ✓");
+  console.log(`Категории: обновлено ${r1.rowCount} записей`);
 
+  // Проверяем и обновляем товары
   const r2 = await client.query(
-    `SELECT id, url FROM product_images WHERE url LIKE '%.png' OR url LIKE '%.jpg' LIMIT 10`
+    `UPDATE product_images SET url = regexp_replace(url, '\\.(png|jpe?g)$', '.webp') WHERE url ~ '\\.(png|jpe?g)$'`
   );
-  console.log("Товары с PNG/JPG:", r2.rows.length > 0 ? r2.rows : "нет — всё WebP ✓");
+  console.log(`Товары: обновлено ${r2.rowCount} записей`);
 
-  // Обновляем категории если остались старые пути
-  if (r1.rows.length > 0) {
-    const updated = await client.query(
-      `UPDATE categories SET image = regexp_replace(image, '\\.(png|jpe?g)$', '.webp') WHERE image ~ '\\.(png|jpe?g)$'`
-    );
-    console.log(`\nОбновлено ${updated.rowCount} категорий на WebP`);
-  }
+  // Проверяем и обновляем блог
+  const r3 = await client.query(
+    `UPDATE articles SET image = regexp_replace(image, '\\.(png|jpe?g)$', '.webp') WHERE image ~ '\\.(png|jpe?g)$'`
+  );
+  console.log(`Блог: обновлено ${r3.rowCount} записей`);
 
+  console.log("\nГотово!");
   await client.end();
 }
 
