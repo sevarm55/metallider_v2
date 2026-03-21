@@ -44,13 +44,18 @@ async function convertDir(dir: string, urlPrefix: string) {
       const newUrl = `${urlPrefix}/${webpName}`;
 
       // Обновляем URL в БД через прямой SQL
-      const result = await client.query(
+      const r1 = await client.query(
         `UPDATE "product_images" SET url = $1 WHERE url = $2`,
         [newUrl, oldUrl]
       );
+      const r2 = await client.query(
+        `UPDATE "categories" SET image = $1 WHERE image = $2`,
+        [newUrl, oldUrl]
+      );
 
-      if (result.rowCount && result.rowCount > 0) {
-        console.log(`  ✓ ${file} → ${webpName} (обновлено ${result.rowCount} записей в БД)`);
+      const total = (r1.rowCount || 0) + (r2.rowCount || 0);
+      if (total > 0) {
+        console.log(`  ✓ ${file} → ${webpName} (обновлено ${total} записей в БД)`);
       } else {
         console.log(`  ✓ ${file} → ${webpName} (нет записей в БД)`);
       }
