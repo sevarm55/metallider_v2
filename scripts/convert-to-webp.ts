@@ -6,6 +6,7 @@
  * С удалением оригиналов: npx tsx scripts/convert-to-webp.ts --delete
  */
 
+import "dotenv/config";
 import sharp from "sharp";
 import { readdir, unlink } from "fs/promises";
 import path from "path";
