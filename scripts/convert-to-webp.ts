@@ -13,7 +13,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../lib/generated/prisma/client";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 const deleteOriginals = process.argv.includes("--delete");
@@ -80,10 +80,12 @@ async function main() {
 
   console.log("\nГотово!");
   await prisma.$disconnect();
+  await pool.end();
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("Ошибка:", err);
-  prisma.$disconnect();
+  await prisma.$disconnect();
+  await pool.end();
   process.exit(1);
 });
