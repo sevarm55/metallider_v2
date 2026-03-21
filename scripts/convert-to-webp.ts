@@ -45,7 +45,7 @@ async function convertDir(dir: string, urlPrefix: string) {
 
       // Обновляем URL в БД через прямой SQL
       const result = await client.query(
-        `UPDATE "ProductImage" SET url = $1 WHERE url = $2`,
+        `UPDATE "product_images" SET url = $1 WHERE url = $2`,
         [newUrl, oldUrl]
       );
 
