@@ -9,13 +9,9 @@
 import sharp from "sharp";
 import { readdir, unlink } from "fs/promises";
 import path from "path";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../lib/generated/prisma/client";
+import pg from "pg";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 const deleteOriginals = process.argv.includes("--delete");
 
 async function convertDir(dir: string, urlPrefix: string) {
@@ -46,14 +42,14 @@ async function convertDir(dir: string, urlPrefix: string) {
       const oldUrl = `${urlPrefix}/${file}`;
       const newUrl = `${urlPrefix}/${webpName}`;
 
-      // Обновляем URL в БД
-      const updated = await prisma.productImage.updateMany({
-        where: { url: oldUrl },
-        data: { url: newUrl },
-      });
+      // Обновляем URL в БД через прямой SQL
+      const result = await client.query(
+        `UPDATE "ProductImage" SET url = $1 WHERE url = $2`,
+        [newUrl, oldUrl]
+      );
 
-      if (updated.count > 0) {
-        console.log(`  ✓ ${file} → ${webpName} (обновлено ${updated.count} записей в БД)`);
+      if (result.rowCount && result.rowCount > 0) {
+        console.log(`  ✓ ${file} → ${webpName} (обновлено ${result.rowCount} записей в БД)`);
       } else {
         console.log(`  ✓ ${file} → ${webpName} (нет записей в БД)`);
       }
@@ -68,6 +64,8 @@ async function convertDir(dir: string, urlPrefix: string) {
 }
 
 async function main() {
+  await client.connect();
+
   console.log("Конвертация изображений в WebP...");
   if (deleteOriginals) {
     console.log("⚠ Режим с удалением оригиналов\n");
@@ -79,13 +77,11 @@ async function main() {
   await convertDir("uploads/categories", "/uploads/categories");
 
   console.log("\nГотово!");
-  await prisma.$disconnect();
-  await pool.end();
+  await client.end();
 }
 
 main().catch(async (err) => {
   console.error("Ошибка:", err);
-  await prisma.$disconnect();
-  await pool.end();
+  await client.end();
   process.exit(1);
 });
