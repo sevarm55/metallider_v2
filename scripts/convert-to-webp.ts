@@ -9,9 +9,13 @@
 import sharp from "sharp";
 import { readdir, unlink } from "fs/promises";
 import path from "path";
-import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../lib/generated/prisma/client";
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 const deleteOriginals = process.argv.includes("--delete");
 
 async function convertDir(dir: string, urlPrefix: string) {
